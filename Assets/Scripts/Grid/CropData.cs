@@ -24,8 +24,8 @@ public class CropData : ScriptableObject
     public int sellValue = 3;
 
     [Header("Growth")]
-    [Tooltip("Seconds from planting to fully grown (on unwatered soil).")]
-    public float growSeconds = 30f;
+    [Tooltip("How many days from planting to fully grown (on unwatered soil).")]
+    public int daysToGrow = 3;
 
     [Tooltip("How many items you get when harvesting this crop.")]
     public int baseYield = 1;
@@ -34,12 +34,13 @@ public class CropData : ScriptableObject
     public InventoryItem produce;
 
     [Header("Watered soil bonus")]
-    [Tooltip("Growth speed multiplier when planted on watered soil. 1 = no change, 1.5 = 50% faster.")]
+    [Tooltip("Growth-per-day multiplier when planted on watered soil. 1 = normal, " +
+             "1.5 = each day counts as 1.5 days of growth.")]
     public float wateredGrowthMultiplier = 1.5f;
 
     [Tooltip("Extra yield when planted on watered soil.")]
     public int wateredYieldBonus = 1;
 
-    // TODO: add growth stage visuals for Crop.ApplyGrowth to swap between, e.g.
-    //       public GameObject[] growthStages;  // shown across t = 0..1
+    // Growth stage visuals live on the crop prefab's Crop component (`stages`),
+    // since they're child models, not data.
 }

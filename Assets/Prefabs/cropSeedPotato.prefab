@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1652627042972981548}
   - component: {fileID: 4061936580637449977}
   - component: {fileID: 7021327106954896502}
-  - component: {fileID: -573111039335930825}
   m_Layer: 0
   m_Name: cropSeedPotato
   m_TagString: Untagged
@@ -87,15 +86,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-573111039335930825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3523300711983442022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f09bd0aabcaa1e44b16bdededc7b4e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

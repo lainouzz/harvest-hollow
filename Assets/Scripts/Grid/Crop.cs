@@ -1,14 +1,25 @@
 using UnityEngine;
+using UnityEngine.Events;
 
-// Attach to a crop prefab. Handles growth over time.
-// Scaffold: for now it just scales up. Swap this for stage-model swapping,
-// material changes, etc. when you have art.
+// Attach to a crop prefab. Grows in whole days (advanced by the DayManager) and
+// swaps between stage models as it grows — no per-frame work.
+//
+// Put each stage as a CHILD of the prefab and drag them into `stages` in order:
+//   sprout -> ... -> ripe (the LAST stage is the harvest-ready look).
 public class Crop : MonoBehaviour
 {
+    [Tooltip("Stage models in order, last = ripe/harvest-ready. Leave empty to " +
+             "fall back to a placeholder scale-up.")]
+    [SerializeField] private GameObject[] stages;
+
+    [Tooltip("Fired once when the crop becomes fully grown — hook a sparkle / sound / icon.")]
+    [SerializeField] private UnityEvent onGrown;
+
     private CropData data;
-    private float growTimer;
-    private float growthMultiplier = 1f;
+    private float grownDays;             // growth accumulated so far, in days
+    private float growthPerDay = 1f;     // > 1 grows faster (watered soil)
     private int bonusYield;
+    private int shownStage = -1;
 
     public bool IsGrown { get; private set; }
     public CropData Data => data;
@@ -27,40 +38,68 @@ public class Crop : MonoBehaviour
     {
         data = cropData;
         GridPosition = cell;
-        this.growthMultiplier = Mathf.Max(0.01f, growthMultiplier);
+        growthPerDay = Mathf.Max(0.01f, growthMultiplier);
         this.bonusYield = bonusYield;
 
-        growTimer = 0f;
+        grownDays = 0f;
         Progress = 0f;
         IsGrown = false;
+        shownStage = -1;
         ApplyGrowth(0f);
     }
 
-    // TODO: growth runs on Time.deltaTime while the object is alive. If you add
-    //       day/night or sleeping, drive this off game-time / day ticks instead,
-    //       otherwise crops freeze when unloaded and ignore skipped days.
-    private void Update()
+    private void OnEnable() => DayManager.OnDayChanged += OnDayChanged;
+    private void OnDisable() => DayManager.OnDayChanged -= OnDayChanged;
+
+    // Each day advances growth by growthPerDay (watered soil counts as more).
+    // TODO: real watering — only apply the watered bonus on days it was watered.
+    private void OnDayChanged(int day)
     {
         if (data == null || IsGrown) return;
 
-        // Watered soil applied its boost via growthMultiplier at plant time.
-        // TODO: real watering — re-water each day; unwatered days slow growth.
-        growTimer += Time.deltaTime * growthMultiplier;
-        Progress = data.growSeconds > 0f ? Mathf.Clamp01(growTimer / data.growSeconds) : 1f;
+        grownDays += growthPerDay;
+
+        float target = data.daysToGrow > 0 ? data.daysToGrow : 1;
+        Progress = Mathf.Clamp01(grownDays / target);
         ApplyGrowth(Progress);
 
         if (Progress >= 1f)
+        {
             IsGrown = true;
-        // TODO: fire an OnGrown event here so the tile/UI can show it's ready
-        //       (particle, sparkle, icon) instead of the player having to guess.
+            onGrown?.Invoke();
+        }
     }
 
     // t: 0 = just planted, 1 = fully grown.
     private void ApplyGrowth(float t)
     {
-        // TODO: replace this placeholder scaling with real stages — swap the stage
-        //       model/sprite from CropData.growthStages based on t. Scaling a mesh
-        //       up from 0.2 is a stand-in, not the look you want.
-        transform.localScale = Vector3.one * Mathf.Lerp(0.2f, 5f, t);
+        if (stages == null || stages.Length == 0)
+        {
+            // Placeholder while a crop has no stage models assigned.
+            transform.localScale = Vector3.one * Mathf.Lerp(0.2f, 1f, t);
+            return;
+        }
+
+        ShowStage(StageForProgress(t));
+    }
+
+    // Ripe (last) stage at full growth; the earlier stages spread across [0,1).
+    private int StageForProgress(float t)
+    {
+        int lastStage = stages.Length - 1;
+        if (t >= 1f || IsGrown) return lastStage;
+        if (stages.Length == 1) return 0;
+
+        int growingStages = stages.Length - 1;   // all but the ripe one
+        return Mathf.Clamp(Mathf.FloorToInt(t * growingStages), 0, growingStages - 1);
+    }
+
+    private void ShowStage(int index)
+    {
+        if (index == shownStage) return;
+        shownStage = index;
+
+        for (int i = 0; i < stages.Length; ++i)
+            if (stages[i] != null) stages[i].SetActive(i == index);
     }
 }

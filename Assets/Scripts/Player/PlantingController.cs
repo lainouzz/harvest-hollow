@@ -23,6 +23,7 @@ public class PlantingController : MonoBehaviour
     [Tooltip("Set by clicking an inventory item at runtime.")]
     [SerializeField] private CropData selectedSeed;
     private InventoryItem selectedSeedItem;   // the inventory stack the seed comes from
+    private InventoryManager inventory;
 
     [Header("Preview (optional)")]
     [Tooltip("A flat quad/decal that highlights the aimed cell. Leave empty to skip.")]
@@ -41,6 +42,10 @@ public class PlantingController : MonoBehaviour
         input = new GameInput();
         if (playerCamera == null) playerCamera = Camera.main;
         if (itemSwitcher == null) itemSwitcher = FindAnyObjectByType<ItemSwitcher>();
+
+        // Find the manager even if its panel starts inactive — subscribing to the
+        // instance event works before its Awake runs, so clicks aren't missed.
+        inventory = FindFirstObjectByType<InventoryManager>(FindObjectsInactive.Include);
     }
 
     private void OnEnable()
@@ -50,8 +55,8 @@ public class PlantingController : MonoBehaviour
         if (itemSwitcher != null)
             itemSwitcher.OnItemChanged += OnItemChanged;
 
-        if (InventoryManager.Instance != null)
-            InventoryManager.Instance.OnItemSelected += OnInventoryItemSelected;
+        if (inventory != null)
+            inventory.OnItemSelected += OnInventoryItemSelected;
     }
 
     private void OnDisable()
@@ -61,8 +66,8 @@ public class PlantingController : MonoBehaviour
         if (itemSwitcher != null)
             itemSwitcher.OnItemChanged -= OnItemChanged;
 
-        if (InventoryManager.Instance != null)
-            InventoryManager.Instance.OnItemSelected -= OnInventoryItemSelected;
+        if (inventory != null)
+            inventory.OnItemSelected -= OnInventoryItemSelected;
     }
 
     // Clicking an inventory item picks the crop it plants as the current seed.
@@ -174,15 +179,15 @@ public class PlantingController : MonoBehaviour
         }
 
         if (grid.TryPlantSeed(aimedCell, selectedSeed))
-            InventoryManager.Instance.Remove(selectedSeedItem, 1);
+            inventory.Remove(selectedSeedItem, 1);
     }
 
     private bool HasSeedInStock()
     {
         return selectedSeedItem != null &&
                selectedSeed != null &&
-               InventoryManager.Instance != null &&
-               InventoryManager.Instance.CountOf(selectedSeedItem) > 0;
+               inventory != null &&
+               inventory.CountOf(selectedSeedItem) > 0;
     }
 
     private void UpdateHighlight()

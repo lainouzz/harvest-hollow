@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Seed_Wheat
   m_EditorClassIdentifier: 
   cropName: Wheat
-  prefab: {fileID: 3523300711983442022, guid: 3430100b051f8674d844f921bf4a1cc9, type: 3}
+  prefab: {fileID: 2271672511856567248, guid: 57b0033b76b9c1f4eb63b0873f829e5a, type: 3}
   icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
   size: {x: 1, y: 1}
   seedCost: 4
-  sellValue: 2
-  growSeconds: 15
+  sellValue: 6
+  daysToGrow: 3
   baseYield: 1
   produce: {fileID: 11400000, guid: 81ea02a66a2df4a4698f68505532f9e0, type: 2}
   wateredGrowthMultiplier: 1.5

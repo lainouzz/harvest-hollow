@@ -1,26 +1,29 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using TMPro;
 
-// One buyable row in the merchant's Buy list: icon, crop name, unit price, and a
-// quantity stepper. Goes on the "Item" template under Content. MerchantShop clones
-// one of these per crop.
+// One row in a merchant list: icon, name, unit price, and a quantity stepper.
+// Works for both Buy and Sell — the section decides the price and the max.
 public class MerchantItemRow : MonoBehaviour
 {
     [SerializeField] private Image icon;
-    [SerializeField] private TMP_Text cropText;
+    [FormerlySerializedAs("cropText")]
+    [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text priceText;      // unit price
     [SerializeField] private TMP_Text quantityText;
     [SerializeField] private Button incrementButton;
     [SerializeField] private Button decrementButton;
 
-    public CropData Crop { get; private set; }
+    public InventoryItem Item { get; private set; }
     public int Quantity { get; private set; }
-    public int UnitPrice => Crop != null ? Crop.seedCost : 0;
+    public int UnitPrice { get; private set; }
     public int LineTotal => UnitPrice * Quantity;
 
-    // Raised when +/- is pressed, so the shop can re-sum the total.
+    private int maxQuantity;   // <= 0 means unlimited (buying)
+
+    // Raised when +/- is pressed, so the section can re-sum the total.
     public event Action OnQuantityChanged;
 
     private void Awake()
@@ -29,14 +32,16 @@ public class MerchantItemRow : MonoBehaviour
         if (decrementButton != null) decrementButton.onClick.AddListener(() => ChangeQuantity(-1));
     }
 
-    public void Setup(CropData crop)
+    public void Setup(InventoryItem item, int unitPrice, int maxQuantity)
     {
-        Crop = crop;
+        Item = item;
+        UnitPrice = unitPrice;
+        this.maxQuantity = maxQuantity;
         Quantity = 0;
 
-        if (icon != null) icon.sprite = crop.icon;
-        if (cropText != null) cropText.text = crop.cropName;
-        if (priceText != null) priceText.text = $"{UnitPrice}G";
+        if (icon != null) icon.sprite = item.icon;
+        if (nameText != null) nameText.text = item.itemName;
+        if (priceText != null) priceText.text = $"{unitPrice}G";
 
         Refresh();
     }
@@ -49,9 +54,12 @@ public class MerchantItemRow : MonoBehaviour
 
     private void ChangeQuantity(int delta)
     {
-        // TODO: clamp to a max (stock limit, or what the player can afford) when
-        //       the real economy exists. For now you can add unlimited.
-        Quantity = Mathf.Max(0, Quantity + delta);
+        int q = Mathf.Max(0, Quantity + delta);
+        if (maxQuantity > 0) q = Mathf.Min(q, maxQuantity);   // can't sell more than you own
+
+        if (q == Quantity) return;   // hit a limit — nothing changed
+
+        Quantity = q;
         Refresh();
         OnQuantityChanged?.Invoke();
     }

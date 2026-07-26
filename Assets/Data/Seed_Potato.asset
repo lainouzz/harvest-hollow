@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Seed_Potato
   m_EditorClassIdentifier: 
   cropName: Potato
-  prefab: {fileID: 3523300711983442022, guid: 3430100b051f8674d844f921bf4a1cc9, type: 3}
+  prefab: {fileID: 9064688887389255427, guid: 797a03e27ee264946a09fa0c04033d5f, type: 3}
   icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
   size: {x: 1, y: 1}
   seedCost: 5
-  sellValue: 3
-  growSeconds: 30
+  sellValue: 7
+  daysToGrow: 2
   baseYield: 1
   produce: {fileID: 11400000, guid: a7f561a62680bbf41ba507d40dbdb193, type: 2}
   wateredGrowthMultiplier: 1.5
