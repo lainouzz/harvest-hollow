@@ -30,6 +30,9 @@ public class CropData : ScriptableObject
     [Tooltip("How many items you get when harvesting this crop.")]
     public int baseYield = 1;
 
+    [Tooltip("The inventory item this crop drops when harvested (baseYield-many of it).")]
+    public InventoryItem produce;
+
     [Header("Watered soil bonus")]
     [Tooltip("Growth speed multiplier when planted on watered soil. 1 = no change, 1.5 = 50% faster.")]
     public float wateredGrowthMultiplier = 1.5f;
@@ -39,6 +42,4 @@ public class CropData : ScriptableObject
 
     // TODO: add growth stage visuals for Crop.ApplyGrowth to swap between, e.g.
     //       public GameObject[] growthStages;  // shown across t = 0..1
-    // TODO: baseYield adds CropData to the harvest list — swap for a real
-    //       inventory item type once that exists (a carrot plant gives N carrots).
 }

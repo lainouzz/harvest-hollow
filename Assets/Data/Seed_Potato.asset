@@ -20,5 +20,6 @@ MonoBehaviour:
   sellValue: 3
   growSeconds: 30
   baseYield: 1
+  produce: {fileID: 11400000, guid: a7f561a62680bbf41ba507d40dbdb193, type: 2}
   wateredGrowthMultiplier: 1.5
   wateredYieldBonus: 1

@@ -20,7 +20,9 @@ public class PlantingController : MonoBehaviour
     [SerializeField] private float maxReach = 6f;
 
     [SerializeField] private CropData selectedCrop;
+    [Tooltip("Set by clicking an inventory item at runtime.")]
     [SerializeField] private CropData selectedSeed;
+    private InventoryItem selectedSeedItem;   // the inventory stack the seed comes from
 
     [Header("Preview (optional)")]
     [Tooltip("A flat quad/decal that highlights the aimed cell. Leave empty to skip.")]
@@ -47,6 +49,9 @@ public class PlantingController : MonoBehaviour
 
         if (itemSwitcher != null)
             itemSwitcher.OnItemChanged += OnItemChanged;
+
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.OnItemSelected += OnInventoryItemSelected;
     }
 
     private void OnDisable()
@@ -55,6 +60,19 @@ public class PlantingController : MonoBehaviour
 
         if (itemSwitcher != null)
             itemSwitcher.OnItemChanged -= OnItemChanged;
+
+        if (InventoryManager.Instance != null)
+            InventoryManager.Instance.OnItemSelected -= OnInventoryItemSelected;
+    }
+
+    // Clicking an inventory item picks the crop it plants as the current seed.
+    private void OnInventoryItemSelected(InventoryItem item)
+    {
+        if (item == null || item.crop == null) return;
+
+        selectedSeedItem = item;
+        selectedSeed = item.crop;
+        Debug.Log($"Selected {item.crop.cropName} to plant.");
     }
 
     private void Start()
@@ -101,7 +119,7 @@ public class PlantingController : MonoBehaviour
                 break;
 
             case ItemsInHand.Seeds:
-                grid.TryPlantSeed(aimedCell, selectedSeed);
+                TryPlantSelectedSeed();
                 break;
 
             case ItemsInHand.HarvestTool:
@@ -140,9 +158,31 @@ public class PlantingController : MonoBehaviour
             return;
         }
 
-        // TODO: check the inventory has seeds for selectedCrop and deduct one on
-        //       success (TryPlant returns false if it didn't plant - don't deduct then).
         grid.TryPlant(aimedCell, selectedCrop);
+    }
+
+    // Plants the selected seed and consumes one from the inventory — but only if
+    // the plant actually happened. No seed in stock = can't plant.
+    private void TryPlantSelectedSeed()
+    {
+        if (!HasSeedInStock())
+        {
+            Debug.Log(selectedSeed == null
+                ? "No seed selected — pick one from the inventory."
+                : $"Out of {selectedSeed.cropName} seeds.");
+            return;
+        }
+
+        if (grid.TryPlantSeed(aimedCell, selectedSeed))
+            InventoryManager.Instance.Remove(selectedSeedItem, 1);
+    }
+
+    private bool HasSeedInStock()
+    {
+        return selectedSeedItem != null &&
+               selectedSeed != null &&
+               InventoryManager.Instance != null &&
+               InventoryManager.Instance.CountOf(selectedSeedItem) > 0;
     }
 
     private void UpdateHighlight()
@@ -173,7 +213,7 @@ public class PlantingController : MonoBehaviour
                 return grid.GetState(aimedCell) == TileState.Tilled;
 
             case ItemsInHand.Seeds:
-                return selectedSeed != null && grid.CanPlantSeed(aimedCell);
+                return HasSeedInStock() && grid.CanPlantSeed(aimedCell);
 
             case ItemsInHand.HarvestTool:
                 return grid.CanHarvest(aimedCell);

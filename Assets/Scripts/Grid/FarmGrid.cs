@@ -29,11 +29,6 @@ public class FarmGrid : MonoBehaviour
     private readonly List<Crop> plantedCrops = new();
     public IReadOnlyList<Crop> PlantedCrops => plantedCrops;
 
-    // What's been harvested. Placeholder for the future inventory — for now it
-    // just accumulates so you can inspect it / hook a UI to it later.
-    private readonly List<HarvestedCrop> harvested = new();
-    public IReadOnlyList<HarvestedCrop> Harvested => harvested;
-
     private Wallet wallet;   // found lazily; used for the placeholder harvest reward
 
     public Vector3 Origin => transform.position;
@@ -186,8 +181,8 @@ public class FarmGrid : MonoBehaviour
         return true;
     }
 
-    // Harvests a fully-grown crop: records it, removes the plant, leaves the tile.
-    // TODO: `harvested` is a stand-in — push into the real inventory when it exists.
+    // Harvests a fully-grown crop: drops its produce into the inventory, removes
+    // the plant, and leaves the tile behind so you can replant.
     public bool HarvestAt(Vector2Int cell)
     {
         if (!CanHarvest(cell)) return false;
@@ -195,8 +190,11 @@ public class FarmGrid : MonoBehaviour
         GridCellData data = cells[cell.x, cell.y];
         Crop crop = data.crop;
 
-        harvested.Add(new HarvestedCrop { crop = crop.Data, amount = crop.Yield });
         Debug.Log($"Harvested {crop.Data.cropName} x{crop.Yield}!");
+
+        // Drop this crop's own produce into the inventory, yield-many of it.
+        if (InventoryManager.Instance != null && crop.Data.produce != null)
+            InventoryManager.Instance.Add(crop.Data.produce, crop.Yield);
 
         plantedCrops.Remove(crop);
         Destroy(crop.gameObject);
@@ -478,13 +476,6 @@ public class GridCellData
     public string id;               // id of that tile (key into `placed`)
     public TileState state = TileState.Untilled;
     public Crop crop;               // crop growing on top of the tile, if any
-}
-
-// A harvested stack. Placeholder until the real inventory item type exists.
-public class HarvestedCrop
-{
-    public CropData crop;
-    public int amount;
 }
 
 public class PlacedObjectData
