@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc9e59e82f954ce46b9a52fba9a235f1, type: 3}
-  m_Name: Seed_Wheat
+  m_Name: Seed_Potato
   m_EditorClassIdentifier: 
-  cropName: Wheat
-  prefab: {fileID: 2271672511856567248, guid: 57b0033b76b9c1f4eb63b0873f829e5a, type: 3}
+  cropName: Potato
+  prefab: {fileID: 5726726926310105077, guid: f9b7543fe1f87774bba9553d85701799, type: 3}
   icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
   size: {x: 1, y: 1}
-  seedCost: 4
-  sellValue: 6
+  seedCost: 10
+  sellValue: 7
   daysToGrow: 3
-  baseYield: 1
-  produce: {fileID: 11400000, guid: 81ea02a66a2df4a4698f68505532f9e0, type: 2}
+  baseYield: 4
+  produce: {fileID: 11400000, guid: a7f561a62680bbf41ba507d40dbdb193, type: 2}
   wateredGrowthMultiplier: 1.5
   wateredYieldBonus: 1

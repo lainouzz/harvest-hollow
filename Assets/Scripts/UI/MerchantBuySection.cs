@@ -1,17 +1,77 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// The Buy list: a fixed set of items the merchant sells. Buying spends coins and
-// deposits the items into the inventory. Put this on the BuySection object.
+// Rarity tier — decides how likely a crop is to be in stock when the merchant arrives.
+public enum CropTier { Starter, Common, Premium }
+
+[Serializable]
+public class BuyableCrop
+{
+    public InventoryItem item;
+    public CropTier tier = CropTier.Common;
+}
+
+// The Buy list. Each arrival, it rolls which crops are in stock by tier (starter/
+// common almost always, premium sometimes). Buying spends coins and deposits the
+// items into the inventory. Put this on the BuySection object.
 public class MerchantBuySection : MerchantSection
 {
-    [Header("Buy list")]
-    [Tooltip("Items the merchant sells. Price comes from each item's `value`.")]
-    [SerializeField] private List<InventoryItem> forSale = new();
+    [Header("Catalog")]
+    [Tooltip("Everything the merchant *can* sell, each tagged with a tier.")]
+    [SerializeField] private List<BuyableCrop> catalog = new();
+
+    [Header("Stock chance per tier (0-1)")]
+    [Range(0f, 1f)] [SerializeField] private float starterChance = 1f;
+    [Range(0f, 1f)] [SerializeField] private float commonChance = 1f;
+    [Range(0f, 1f)] [SerializeField] private float premiumChance = 0.4f;
+
+    private readonly List<InventoryItem> currentStock = new();
+    private int lastRestockDay = int.MinValue;
+
+    protected override void OnEnable()
+    {
+        // "The car arrived" = a new day. Reopening the same day keeps the same
+        // stock (no reroll-until-premium exploit).
+        int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 0;
+        if (day != lastRestockDay)
+        {
+            lastRestockDay = day;
+            RollStock();
+        }
+
+        base.OnEnable();   // builds the rows from currentStock
+    }
+
+    // Force a fresh roll — call this from a real "merchant arrives" event later.
+    public void Restock()
+    {
+        RollStock();
+        if (isActiveAndEnabled) BuildRows();
+    }
+
+    private void RollStock()
+    {
+        currentStock.Clear();
+        foreach (BuyableCrop entry in catalog)
+        {
+            if (entry.item == null) continue;
+            if (UnityEngine.Random.value <= ChanceFor(entry.tier))
+                currentStock.Add(entry.item);
+        }
+    }
+
+    private float ChanceFor(CropTier tier) => tier switch
+    {
+        CropTier.Starter => starterChance,
+        CropTier.Common => commonChance,
+        CropTier.Premium => premiumChance,
+        _ => 1f,
+    };
 
     protected override IEnumerable<MerchantOffer> GetOffers()
     {
-        foreach (InventoryItem item in forSale)
+        foreach (InventoryItem item in currentStock)
             if (item != null)
                 yield return new MerchantOffer { item = item, unitPrice = item.value, maxQuantity = 0 };
     }

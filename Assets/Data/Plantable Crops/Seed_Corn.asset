@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc9e59e82f954ce46b9a52fba9a235f1, type: 3}
-  m_Name: Seed_Radish
+  m_Name: Seed_Corn
   m_EditorClassIdentifier: 
-  cropName: Radish
-  prefab: {fileID: 5347061298195340050, guid: 280ae883da9593547b8451c1da83cfc6, type: 3}
+  cropName: Corn
+  prefab: {fileID: 3394348395526295297, guid: 7df9ed359a408724aabb29e588a10270, type: 3}
   icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
   size: {x: 1, y: 1}
-  seedCost: 10
-  sellValue: 15
-  daysToGrow: 7
-  baseYield: 1
-  produce: {fileID: 11400000, guid: 32eed4ada7bc9454fa73c231ca7827ec, type: 2}
+  seedCost: 44
+  sellValue: 7
+  daysToGrow: 5
+  baseYield: 5
+  produce: {fileID: 11400000, guid: 5bd85b1fd4c711e4f8c6ef9fbef94064, type: 2}
   wateredGrowthMultiplier: 1.5
   wateredYieldBonus: 1

@@ -1,0 +1,80 @@
+using UnityEngine;
+using TMPro;
+
+// Debug/tuning readout: how much gold you earn and spend per day, plus a rough
+// gold-per-crop-per-day figure to size expansion pricing (the "p" value) against.
+//
+// Earned = positive wallet changes (harvest/sell); Spent = negative ones (plots,
+// seeds). It reports on each day change. Remove once you've tuned the economy.
+public class IncomeTracker : MonoBehaviour
+{
+    [Tooltip("Optional on-screen text. Leave empty to just log to the Console.")]
+    [SerializeField] private TMP_Text readout;
+
+    private Wallet wallet;
+    private FarmGrid grid;
+
+    private int prevCoins;
+    private int earnedToday;
+    private int spentToday;
+    private int totalEarned;
+    private int totalSpent;
+    private int daysMeasured;
+
+    private void Awake()
+    {
+        wallet = FindFirstObjectByType<Wallet>(FindObjectsInactive.Include);
+        grid = FindFirstObjectByType<FarmGrid>(FindObjectsInactive.Include);
+    }
+
+    private void OnEnable()
+    {
+        if (wallet != null)
+        {
+            prevCoins = wallet.Coins;
+            wallet.OnCoinsChanged += OnCoinsChanged;
+        }
+
+        DayManager.OnDayChanged += OnDayChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (wallet != null) wallet.OnCoinsChanged -= OnCoinsChanged;
+        DayManager.OnDayChanged -= OnDayChanged;
+    }
+
+    private void OnCoinsChanged(int total)
+    {
+        int delta = total - prevCoins;
+        prevCoins = total;
+
+        if (delta > 0) earnedToday += delta;
+        else spentToday += -delta;
+    }
+
+    // Reports the day that just ended, then resets the per-day counters.
+    private void OnDayChanged(int day)
+    {
+        daysMeasured++;
+        totalEarned += earnedToday;
+        totalSpent += spentToday;
+
+        int crops = grid != null ? grid.PlantedCrops.Count : 0;
+        float avgEarnedPerDay = (float)totalEarned / daysMeasured;
+        float avgSpentPerDay = (float)totalSpent / daysMeasured;
+        float perCrop = crops > 0 ? avgEarnedPerDay / crops : 0f;
+
+        string text =
+            $"Day {day - 1} ended\n" +
+            $"Earned: {earnedToday}g   Spent: {spentToday}g\n" +
+            $"Avg/day: +{avgEarnedPerDay:0} earned, -{avgSpentPerDay:0} spent\n" +
+            $"Farming {crops} crops  ->  ~{perCrop:0.0}g per crop/day (avg)";
+
+        Debug.Log(text);
+        if (readout != null) readout.text = text;
+
+        earnedToday = 0;
+        spentToday = 0;
+    }
+}
