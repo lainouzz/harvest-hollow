@@ -3,19 +3,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// The view for one inventory row (on the "Item" prefab). References are assigned
-// in the prefab, so there's no transform.Find at runtime.
+// The view for one inventory row (on the "Item" prefab).
 public class ItemController : MonoBehaviour
 {
-    [Tooltip("The 'ItemName' text.")]
     [SerializeField] private TMP_Text nameText;
-    [Tooltip("The 'ItemIcon' image.")]
     [SerializeField] private Image iconImage;
-    [Tooltip("The 'RemoveButton'.")]
     [SerializeField] private Button removeButton;
-
-    [Tooltip("The row's own button (clicking it selects the item). " +
-             "Empty = a Button on this object.")]
+    [Tooltip("Clicking this selects the item. Empty = a Button on this object.")]
     [SerializeField] private Button rowButton;
 
     public InventoryItem Item { get; private set; }

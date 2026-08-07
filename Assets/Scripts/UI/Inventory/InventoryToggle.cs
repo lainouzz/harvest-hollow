@@ -1,22 +1,18 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Opens/closes the inventory panel on Tab. Put this on an ALWAYS-ACTIVE object
-// (e.g. the Player) — not on the panel itself, or it would stop running the
-// moment the panel is hidden and you could never reopen it.
+// Opens/closes the inventory panel on Tab. Put on an always-active object (e.g. the
+// Player), NOT the panel — a hidden object stops updating and couldn't reopen it.
 public class InventoryToggle : MonoBehaviour
 {
-    [Tooltip("The inventory panel to show/hide (e.g. playerInventory).")]
     [SerializeField] private GameObject inventoryPanel;
-
-    [Tooltip("Optional — freezes camera look and frees the cursor while open.")]
+    [Tooltip("Optional — freezes look and frees the cursor while open.")]
     [SerializeField] private PlayerLook playerLook;
-
     [SerializeField] private Key toggleKey = Key.Tab;
 
     private void Start()
     {
-        SetOpen(false);   // start closed and in a known state
+        SetOpen(false);
     }
 
     private void Update()
@@ -32,7 +28,7 @@ public class InventoryToggle : MonoBehaviour
             SetOpen(!inventoryPanel.activeSelf);
     }
 
-    // Public so the Exit button can hook Close() directly.
+    // Public so the Exit button can hook Close().
     public void Open() => SetOpen(true);
     public void Close() => SetOpen(false);
 
@@ -41,12 +37,11 @@ public class InventoryToggle : MonoBehaviour
         if (inventoryPanel != null)
             inventoryPanel.SetActive(open);
 
-        // Make sure the list reflects the latest items when it opens.
         if (open && InventoryManager.Instance != null)
             InventoryManager.Instance.Refresh();
 
         if (playerLook != null)
-            playerLook.isInShopUI = open;   // reuse the "a UI is open, stop looking" flag
+            playerLook.isInShopUI = open;
 
         Cursor.lockState = open ? CursorLockMode.Confined : CursorLockMode.Locked;
         Cursor.visible = open;

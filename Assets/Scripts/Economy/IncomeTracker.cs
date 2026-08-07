@@ -1,14 +1,11 @@
 using UnityEngine;
 using TMPro;
 
-// Debug/tuning readout: how much gold you earn and spend per day, plus a rough
-// gold-per-crop-per-day figure to size expansion pricing (the "p" value) against.
-//
-// Earned = positive wallet changes (harvest/sell); Spent = negative ones (plots,
-// seeds). It reports on each day change. Remove once you've tuned the economy.
+// Debug/tuning readout: gold earned and spent per day, plus a rough gold-per-crop-
+// per-day figure ("p") to size expansion pricing. Remove once the economy is tuned.
 public class IncomeTracker : MonoBehaviour
 {
-    [Tooltip("Optional on-screen text. Leave empty to just log to the Console.")]
+    [Tooltip("Optional on-screen text. Empty = log to the Console.")]
     [SerializeField] private TMP_Text readout;
 
     private Wallet wallet;
@@ -53,7 +50,6 @@ public class IncomeTracker : MonoBehaviour
         else spentToday += -delta;
     }
 
-    // Reports the day that just ended, then resets the per-day counters.
     private void OnDayChanged(int day)
     {
         daysMeasured++;

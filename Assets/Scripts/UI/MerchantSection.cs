@@ -3,8 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// One thing the merchant offers: an item, its unit price, and how many are
-// available (<= 0 = unlimited, used for buying).
+// One thing the merchant offers (maxQuantity <= 0 = unlimited).
 public struct MerchantOffer
 {
     public InventoryItem item;
@@ -12,24 +11,15 @@ public struct MerchantOffer
     public int maxQuantity;
 }
 
-// Shared logic for a merchant list section (Buy or Sell): spawns a row per offer,
-// tracks the total, and confirms. Subclasses supply the offers and the action.
+// Shared logic for a merchant list section. Subclasses supply the offers and the action.
 public abstract class MerchantSection : MonoBehaviour
 {
     [Header("Scene references")]
-    [Tooltip("The 'Content' object (with the Grid Layout Group). Rows spawn under it.")]
     [SerializeField] protected Transform contentParent;
-
-    [Tooltip("The 'Item' template row. It gets cloned per offer and hidden itself.")]
     [SerializeField] protected MerchantItemRow itemTemplate;
-
-    [Tooltip("The 'TotalPrice' text at the bottom of this section.")]
     [SerializeField] protected TMP_Text totalPriceText;
-
-    [Tooltip("Button that confirms this section (BuyItemsButton / SellItemsButton).")]
+    [Tooltip("BuyItemsButton / SellItemsButton.")]
     [SerializeField] protected Button confirmButton;
-
-    [Tooltip("Empty = find the Wallet in the scene.")]
     [SerializeField] protected Wallet wallet;
 
     protected InventoryManager inventory;
@@ -41,11 +31,10 @@ public abstract class MerchantSection : MonoBehaviour
         if (confirmButton != null) confirmButton.onClick.AddListener(Confirm);
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
 
-        // Found including inactive so it works even if the inventory panel is hidden.
+        // Include inactive so it works even if the inventory panel is hidden.
         inventory = FindFirstObjectByType<InventoryManager>(FindObjectsInactive.Include);
     }
 
-    // Rebuild whenever the section is shown, so it matches the current data.
     protected virtual void OnEnable()
     {
         BuildRows();
@@ -94,9 +83,6 @@ public abstract class MerchantSection : MonoBehaviour
         RecalculateTotal();
     }
 
-    // What this section lists.
     protected abstract IEnumerable<MerchantOffer> GetOffers();
-
-    // What the confirm button does. Public so it can also be wired in the inspector.
     public abstract void Confirm();
 }

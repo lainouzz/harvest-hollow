@@ -55,7 +55,6 @@ public class HotbarHUD : MonoBehaviour
 
     private void Start()
     {
-        // Reflect whatever's already equipped.
         if (itemSwitcher != null)
             Highlight((int)itemSwitcher.Current);
     }

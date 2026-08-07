@@ -8,7 +8,6 @@ public class InventoryItem : ScriptableObject
     public int value;
     public Sprite icon;
 
-    [Tooltip("The crop this item plants when selected. Leave empty for items that " +
-             "aren't seeds/plantable.")]
+    [Tooltip("The crop this item plants. Empty for non-plantable items.")]
     public CropData crop;
 }

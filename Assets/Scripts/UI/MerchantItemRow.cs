@@ -4,14 +4,13 @@ using UnityEngine.Serialization;
 using UnityEngine.UI;
 using TMPro;
 
-// One row in a merchant list: icon, name, unit price, and a quantity stepper.
-// Works for both Buy and Sell — the section decides the price and the max.
+// One row in a merchant list. Works for both Buy and Sell — the section sets price and max.
 public class MerchantItemRow : MonoBehaviour
 {
     [SerializeField] private Image icon;
     [FormerlySerializedAs("cropText")]
     [SerializeField] private TMP_Text nameText;
-    [SerializeField] private TMP_Text priceText;      // unit price
+    [SerializeField] private TMP_Text priceText;
     [SerializeField] private TMP_Text quantityText;
     [SerializeField] private Button incrementButton;
     [SerializeField] private Button decrementButton;
@@ -21,9 +20,8 @@ public class MerchantItemRow : MonoBehaviour
     public int UnitPrice { get; private set; }
     public int LineTotal => UnitPrice * Quantity;
 
-    private int maxQuantity;   // <= 0 means unlimited (buying)
+    private int maxQuantity;   // <= 0 = unlimited (buying)
 
-    // Raised when +/- is pressed, so the section can re-sum the total.
     public event Action OnQuantityChanged;
 
     private void Awake()
@@ -55,9 +53,8 @@ public class MerchantItemRow : MonoBehaviour
     private void ChangeQuantity(int delta)
     {
         int q = Mathf.Max(0, Quantity + delta);
-        if (maxQuantity > 0) q = Mathf.Min(q, maxQuantity);   // can't sell more than you own
-
-        if (q == Quantity) return;   // hit a limit — nothing changed
+        if (maxQuantity > 0) q = Mathf.Min(q, maxQuantity);
+        if (q == Quantity) return;
 
         Quantity = q;
         Refresh();

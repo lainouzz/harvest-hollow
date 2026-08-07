@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-// Holds the player's items as stacks (item + count) and rebuilds the UI list
-// whenever it changes.
+// Holds the player's items as stacks (item + count) and rebuilds the UI list on change.
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
@@ -16,24 +15,18 @@ public class InventoryManager : MonoBehaviour
         public int count;
     }
 
-    [Tooltip("The 'Content' object under the viewport (has the grid layout).")]
     [FormerlySerializedAs("itemConent")]
     [SerializeField] private Transform itemContent;
-
-    [Tooltip("The 'Item' row prefab — must have an ItemController.")]
     [FormerlySerializedAs("inventoryItem")]
     [SerializeField] private GameObject itemPrefab;
 
-    [Tooltip("Items the player starts the game with (e.g. Potato x10, Wheat x5).")]
+    [Tooltip("Items the player starts with (e.g. Potato x10, Wheat x5).")]
     [SerializeField] private List<Stack> startingItems = new();
 
     private readonly List<Stack> stacks = new();
     public IReadOnlyList<Stack> Stacks => stacks;
 
-    // Fired whenever the contents change (so a HUD count, etc. can react too).
     public event Action OnChanged;
-
-    // Fired when the player clicks a row (e.g. to pick a seed to plant).
     public event Action<InventoryItem> OnItemSelected;
 
     private void Awake()
@@ -53,12 +46,10 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
-        // Give the player their starting items.
         foreach (Stack s in startingItems)
             if (s != null) Add(s.item, s.count);
     }
 
-    // Adds `count` of an item, stacking onto an existing entry if present.
     public void Add(InventoryItem item, int count = 1)
     {
         if (item == null || count <= 0) return;
@@ -70,7 +61,6 @@ public class InventoryManager : MonoBehaviour
         Changed();
     }
 
-    // Removes `count` of an item; drops the stack entirely when it hits zero.
     public void Remove(InventoryItem item, int count = 1)
     {
         if (item == null || count <= 0) return;
@@ -103,12 +93,10 @@ public class InventoryManager : MonoBehaviour
         Refresh();
     }
 
-    // Rebuilds the whole list UI from the current stacks.
     public void Refresh()
     {
         if (itemContent == null || itemPrefab == null) return;
 
-        // Clear old rows first (the original bug: rows kept piling up).
         for (int i = itemContent.childCount - 1; i >= 0; --i)
             Destroy(itemContent.GetChild(i).gameObject);
 

@@ -1,18 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// The Sell list: built from whatever the player owns. Selling removes items from
-// the inventory and pays out. Put this on the SellSection object.
+// The Sell list: built from what the player owns. Selling removes items and pays out.
 public class MerchantSellSection : MerchantSection
 {
     [Header("Sell pricing")]
-    [Tooltip("Payout as a fraction of each item's value (0.5 = sell for half of what it's worth).")]
+    [Tooltip("Payout as a fraction of value (0.5 = sell for half).")]
     [Range(0f, 1f)]
     [SerializeField] private float sellMultiplier = 0.5f;
 
     protected override void OnEnable()
     {
-        base.OnEnable();   // builds the rows from the inventory
+        base.OnEnable();
 
         // Keep the list in sync if the inventory changes while Sell is open.
         if (inventory != null) inventory.OnChanged += BuildRows;
@@ -33,7 +32,7 @@ public class MerchantSellSection : MerchantSection
                 {
                     item = stack.item,
                     unitPrice = Mathf.RoundToInt(stack.item.value * sellMultiplier),
-                    maxQuantity = stack.count,   // can't sell more than you have
+                    maxQuantity = stack.count,
                 };
     }
 
@@ -70,6 +69,6 @@ public class MerchantSellSection : MerchantSection
         if (wallet != null) wallet.Add(total);
         Debug.Log($"Merchant: sold for {total}g. Coins: {(wallet != null ? wallet.Coins : 0)}.");
 
-        BuildRows();   // one rebuild to reflect the new stock
+        BuildRows();
     }
 }

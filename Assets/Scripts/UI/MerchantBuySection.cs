@@ -40,7 +40,7 @@ public class MerchantBuySection : MerchantSection
             RollStock();
         }
 
-        base.OnEnable();   // builds the rows from currentStock
+        base.OnEnable();
     }
 
     // Force a fresh roll — call this from a real "merchant arrives" event later.
