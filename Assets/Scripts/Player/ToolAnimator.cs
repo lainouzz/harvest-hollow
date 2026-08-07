@@ -15,6 +15,7 @@ public class ToolAnimator : MonoBehaviour
 {
     [Tooltip("Which ItemSwitcher's held tool to animate. Empty = find one in the scene.")]
     [SerializeField] private ItemSwitcher itemSwitcher;
+    [SerializeField] private PlayerLook player;
 
     [Tooltip("Trigger parameter on each tool's Animator that plays its use animation.")]
     [SerializeField] private string useTrigger = "Use";
@@ -33,6 +34,7 @@ public class ToolAnimator : MonoBehaviour
     {
         input = new GameInput();
         if (itemSwitcher == null) itemSwitcher = FindAnyObjectByType<ItemSwitcher>();
+        if (player == null) player = FindAnyObjectByType<PlayerLook>();
     }
 
     private void OnEnable()
@@ -55,7 +57,7 @@ public class ToolAnimator : MonoBehaviour
 
     private void Update()
     {
-        if (playOnAttack && input.Player.Attack.WasPressedThisFrame())
+        if (playOnAttack && input.Player.Attack.WasPressedThisFrame() && !player.isInShopUI)
             PlayUse();
     }
 

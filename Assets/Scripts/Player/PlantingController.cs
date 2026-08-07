@@ -24,6 +24,7 @@ public class PlantingController : MonoBehaviour
     [SerializeField] private CropData selectedSeed;
     private InventoryItem selectedSeedItem;   // the inventory stack the seed comes from
     private InventoryManager inventory;
+    private PlayerLook playerLook;
 
     [Header("Preview (optional)")]
     [Tooltip("A flat quad/decal that highlights the aimed cell. Leave empty to skip.")]
@@ -42,9 +43,8 @@ public class PlantingController : MonoBehaviour
         input = new GameInput();
         if (playerCamera == null) playerCamera = Camera.main;
         if (itemSwitcher == null) itemSwitcher = FindAnyObjectByType<ItemSwitcher>();
+        if (playerLook == null) playerLook = FindAnyObjectByType<PlayerLook>();
 
-        // Find the manager even if its panel starts inactive — subscribing to the
-        // instance event works before its Awake runs, so clicks aren't missed.
         inventory = FindFirstObjectByType<InventoryManager>(FindObjectsInactive.Include);
     }
 
@@ -100,11 +100,6 @@ public class PlantingController : MonoBehaviour
 
         if (input.Player.Attack.WasPressedThisFrame())
             HandleLeftClick(currentItem);
-            
-
-        // TODO: E currently just deletes. It should HARVEST instead: only work if
-        //       the Crop on that cell IsGrown, add crop.sellValue/produce to the
-        //       inventory, then clear the crop but leave the tile tilled.
     }
 
     // What a left-click does depends on what you're holding.

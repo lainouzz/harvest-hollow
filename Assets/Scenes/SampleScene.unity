@@ -623,6 +623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemSwitcher: {fileID: 1868870425}
+  player: {fileID: 0}
   useTrigger: Use
   playOnAttack: 1
   useDuration: 0.5
