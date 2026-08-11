@@ -272,6 +272,9 @@ GameObject:
   - component: {fileID: 5070352866521018082}
   - component: {fileID: 4856180177503132237}
   - component: {fileID: 5129980392675051142}
+  - component: {fileID: 1218125185200993341}
+  - component: {fileID: 828618766814445002}
+  - component: {fileID: 9208495081650658276}
   m_Layer: 0
   m_Name: MerchantCar
   m_TagString: Untagged
@@ -287,9 +290,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3567011347903569933}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+  m_LocalRotation: {x: -0.7069834, y: 0, z: 0, w: 0.7072302}
   m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4596, y: 1.4596, z: 1.4596}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8452446741856947742}
@@ -298,7 +301,7 @@ Transform:
   - {fileID: 581809811645063524}
   - {fileID: 6747609822342609898}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -89.98, y: 0, z: 0}
 --- !u!33 &4856180177503132237
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -356,6 +359,59 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1218125185200993341
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3567011347903569933}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.4488575, y: 5.309525, z: 1.1596656}
+  m_Center: {x: 0.00000016351808, y: 0.175, z: 0.9201666}
+--- !u!114 &828618766814445002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3567011347903569933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51dc4e5829d968a4e8ea29e9894688be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MerchantUIGameobject: {fileID: 0}
+  playerLook: {fileID: 0}
+--- !u!114 &9208495081650658276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3567011347903569933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b314473c1e7fc574897db78f2a478ca4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  driveSpeed: 50
+  timerBeforeLeaving: 30
+  timerBeforeArriving: 20
+  startPos: {fileID: 0}
+  endPos: {fileID: 0}
+  CarPrefab: {fileID: 2697574124540022733}
 --- !u!1 &6918489589567536599
 GameObject:
   m_ObjectHideFlags: 0

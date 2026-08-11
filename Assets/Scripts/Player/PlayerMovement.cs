@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 
-[RequireComponent (typeof(CharacterController))]
+[RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
     //----------Movement VARIABLES----------
@@ -30,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private LayerMask layerMask;
 
     private Vector3 velocity = Vector3.zero;
-    
+
     private GameInput inputActions;
     private CharacterController controller;
 
@@ -40,68 +39,53 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
     }
 
-    private void OnEnable()
-    {
-        inputActions.Enable();
-    }
+    private void OnEnable() => inputActions.Enable();
+    private void OnDisable() => inputActions.Disable();
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (isGrounded)
-        {
-            coyoteCounter = coyoteTime;
-        }
-        else
-        {
-            coyoteCounter -= Time.deltaTime;
-        }
-
-        if (inputActions.Player.Jump.triggered)
-        {
-            jumpBufferCounter = jumpBufferTime;
-        }
-        else
-        {
-            jumpBufferCounter -= Time.deltaTime;
-        }
-    }
-
-    private void FixedUpdate()
+    // CharacterController has no physics interpolation, so moving it in FixedUpdate
+    // makes it step at the physics rate and jitter. Drive it in Update instead.
+    private void Update()
     {
         UpdateGrounded();
-        Move();
+        HandleJumpTimers();
+
         if (jumpBufferCounter > 0f && coyoteCounter > 0f)
-        {
             Jump();
-        }
+
         ApplyGravity();
+        Move();
     }
 
     private void UpdateGrounded()
     {
         isGrounded = controller.isGrounded;
 
-        if(isGrounded && velocity.y < 0f)
-        {
+        if (isGrounded && velocity.y < 0f)
             velocity.y = 0f;
-        } 
+    }
+
+    private void HandleJumpTimers()
+    {
+        coyoteCounter = isGrounded ? coyoteTime : coyoteCounter - Time.deltaTime;
+
+        jumpBufferCounter = inputActions.Player.Jump.triggered
+            ? jumpBufferTime
+            : jumpBufferCounter - Time.deltaTime;
     }
 
     private void ApplyGravity()
     {
-        velocity.y += gravity * Time.fixedDeltaTime;
+        velocity.y += gravity * Time.deltaTime;
     }
 
-    private void Move() 
+    private void Move()
     {
         Vector2 input = inputActions.Player.Move.ReadValue<Vector2>();
 
         Vector3 move = (transform.right * input.x + transform.forward * input.y).normalized;
-
         Vector3 finalMove = move * moveSpeed + velocity;
 
-        controller.Move(finalMove * Time.fixedDeltaTime);
+        controller.Move(finalMove * Time.deltaTime);
     }
 
     private void Jump()
@@ -110,10 +94,5 @@ public class PlayerMovement : MonoBehaviour
 
         jumpBufferCounter = 0;
         coyoteCounter = 0;
-    }
-
-    private void OnDisable()
-    {
-        inputActions.Disable();
     }
 }
