@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
+using Color = UnityEngine.Color;
 
 
 public class FarmGrid : MonoBehaviour
@@ -52,11 +54,6 @@ public class FarmGrid : MonoBehaviour
         InitGrid();
     }
 
-    // The full array exists at max size from the start; cells outside the starting
-    // region are locked until bought. Expansion only ever flips isUnlocked — it never
-    // reallocates, so crops/tiles/ids are never disturbed.
-    // TODO: save/load — cells[] + `placed` is the whole farm state. Serialize it
-    //       (grid pos, crop id, tile state, growth progress, unlocked) to persist.
     private void InitGrid()
     {
         int unlockedW = Mathf.Clamp(startWidth, 0, gridWidth);
@@ -79,27 +76,19 @@ public class FarmGrid : MonoBehaviour
     // Planting / removal API — called by PlantingController.
     // ---------------------------------------------------------------
 
-    // TODO: naming/concept drift — this is called "TryPlant" but right now it places
-    //       GROUND TILES (the untilled tile prefab), not crops. Decide the model:
-    //       either (a) a cell holds a ground tile AND separately a crop on top, or
-    //       (b) keep one placed object per cell. (a) is what a farm game usually
-    //       needs — you plant a crop ON a tilled tile without replacing the tile.
-    //       Everything below (harvest, watering, growth) is blocked on this call.
     public bool TryPlant(Vector2Int cell, CropData crop)
     {
         if (crop == null || crop.prefab == null) return false;
         if (!CanPlace(cell, crop.size)) return false;
 
-        // TODO: charge crop.seedCost (or handle it in the caller) once money exists.
-
         Vector3 worldPos = GridToWorld(cell, crop.size);
         GameObject instance = Instantiate(crop.prefab, worldPos, Quaternion.Euler(-90, 0, 0), transform);
-
+        
         // Freshly placed ground starts untilled.
         if (instance.TryGetComponent(out GroundTile groundTile))
             groundTile.SetState(TileState.Untilled);
-
-            string id = Guid.NewGuid().ToString();
+           
+        string id = Guid.NewGuid().ToString();
         OccupyCells(cell, crop.size, id);
 
         placed[id] = new PlacedObjectData
@@ -110,6 +99,8 @@ public class FarmGrid : MonoBehaviour
             crop = crop,
             instance = instance
         };
+        
+        RefreshStatus(cell);
         return true;
     }
 
@@ -138,6 +129,8 @@ public class FarmGrid : MonoBehaviour
 
         data.crop = cropComponent;
         plantedCrops.Add(cropComponent);
+        cropComponent.OnGrown.AddListener(() => RefreshStatus(cell));
+        RefreshStatus(cell);   // clear the "needs water" icon now something's planted
         return true;
     }
 
@@ -150,25 +143,17 @@ public class FarmGrid : MonoBehaviour
         return data.isOccupied && data.state != TileState.Untilled && data.crop == null;
     }
 
-    // Removes whatever occupies this cell (a crop can cover several cells —
-    // pointing at any of them works).
-    //
-    // TODO: split this into Harvest() and Remove(). Harvest should require
-    //       Crop.IsGrown, push the produce into the inventory, and leave the tile
-    //       behind; Remove is the destructive "dig it up" version. Right now both
-    //       the player's E key and any future harvest path hit this one method.
     public bool RemoveAt(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
 
         GridCellData cellData = cells[cell.x, cell.y];
 
-        // Pull up any crop growing on this tile first, so it doesn't leak in the list.
         if (cellData.crop != null)
         {
             plantedCrops.Remove(cellData.crop);
             Destroy(cellData.crop.gameObject);
-            cellData.crop = null;
+            cellData.crop = null;     
         }
 
         string id = cellData.id;
@@ -199,9 +184,8 @@ public class FarmGrid : MonoBehaviour
         plantedCrops.Remove(crop);
         Destroy(crop.gameObject);
         data.crop = null;
+        RefreshStatus(cell);   // clear the "ready to harvest" icon
 
-        // TODO: placeholder reward — real money should come from SELLING crops, not
-        //       auto-cash on harvest. Routed through the shared Wallet for now.
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
         if (wallet != null) wallet.Add(10);
 
@@ -269,6 +253,7 @@ public class FarmGrid : MonoBehaviour
         }
 
         OnCellStateChanged?.Invoke(cell, state);
+        RefreshStatus(cell);
     }
 
     public TileState GetState(Vector2Int cell)
@@ -353,11 +338,6 @@ public class FarmGrid : MonoBehaviour
         return true;
     }
 
-    // ---------------------------------------------------------------
-    // Expansion — buying more plots. Grid only tracks locked/unlocked;
-    // cost/currency lives in FarmExpansion.
-    // ---------------------------------------------------------------
-
     public bool IsUnlocked(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
@@ -376,8 +356,6 @@ public class FarmGrid : MonoBehaviour
                IsUnlocked(cell + Vector2Int.down);
     }
 
-    // Finds a buyable cell (scan order). Handy for a "buy next slot" button before
-    // there's a proper pick-a-cell UI.
     public bool TryGetNextPurchasableCell(out Vector2Int cell)
     {
         for (int x = 0; x < gridWidth; ++x)
@@ -397,8 +375,6 @@ public class FarmGrid : MonoBehaviour
         return false;
     }
 
-    // Flips a cell to unlocked. Refuses anything that isn't currently purchasable,
-    // so the farm always stays one connected blob. Payment happens in the caller.
     public bool Unlock(Vector2Int cell)
     {
         if (!IsPurchasable(cell)) return false;
@@ -441,7 +417,6 @@ public class FarmGrid : MonoBehaviour
         }
     }
 
-    // Draw each cell as its own square, so the spacing between them is visible.
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
@@ -461,7 +436,30 @@ public class FarmGrid : MonoBehaviour
             }
         }
     }
+    
+    public CellStatus GetStatus(Vector2Int cell)
+    {
+        GridCellData data = cells[cell.x, cell.y];
+        if (!data.isOccupied) return CellStatus.Empty;
+        if (data.crop != null) return data.crop.IsGrown ? CellStatus.ReadyToHarvest : CellStatus.None;
+        if (data.state == TileState.Tilled) return CellStatus.NeedsWater;
+        return CellStatus.None;
+    }
+
+    // Updates the icon on the tile at this cell (does nothing if no tile is there).
+    private void RefreshStatus(Vector2Int cell)
+    {
+        if (!IsInsideGrid(cell)) return;
+
+        string id = cells[cell.x, cell.y].id;
+        if (string.IsNullOrEmpty(id)) return;
+        if (!placed.TryGetValue(id, out PlacedObjectData po) || po.instance == null) return;
+
+        TileStatusIcon icon = po.instance.GetComponentInChildren<TileStatusIcon>(true);
+        if (icon != null) icon.Show(GetStatus(cell)); Debug.Log("Showing icon" + icon);
+    }
 }
+
 public enum TileState
 {
     Untilled = 0,
@@ -469,13 +467,21 @@ public enum TileState
     Watered = 2
 }
 
+public enum CellStatus
+{
+    None,
+    Empty,
+    NeedsWater,
+    ReadyToHarvest,
+}
+
 public class GridCellData
 {
-    public bool isUnlocked;         // has this plot been bought? (start region begins unlocked)
-    public bool isOccupied;         // is a ground tile placed here?
-    public string id;               // id of that tile (key into `placed`)
+    public bool isUnlocked;
+    public bool isOccupied;
+    public string id;
     public TileState state = TileState.Untilled;
-    public Crop crop;               // crop growing on top of the tile, if any
+    public Crop crop;
 }
 
 public class PlacedObjectData

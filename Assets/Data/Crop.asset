@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Crop
   m_EditorClassIdentifier: 
   cropName: Untilled_tile
-  prefab: {fileID: 4758645496001785604, guid: 0eb20a1ca5de6e748997a41bcff6c156, type: 3}
+  prefab: {fileID: 7291053370051500493, guid: 047ecb7cefddbe34ab38d1bb444d6426, type: 3}
+  icon: {fileID: 0}
   size: {x: 1, y: 1}
   seedCost: 1
   sellValue: 3
-  growSeconds: 30
+  daysToGrow: 3
+  baseYield: 1
+  produce: {fileID: 0}
+  wateredGrowthMultiplier: 1.5
+  wateredYieldBonus: 1

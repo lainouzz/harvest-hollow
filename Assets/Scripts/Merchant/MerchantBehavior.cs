@@ -13,6 +13,13 @@ public class MerchantBehavior : MonoBehaviour
     [SerializeField] private Transform endPos;
     [SerializeField] private GameObject CarPrefab;
 
+    [SerializeField] private float wheelSpinMultiplier;
+
+    [SerializeField] private Transform leftFrontWheel;
+    [SerializeField] private Transform rightFrontWheel;
+    [SerializeField] private Transform leftBackWheel;
+    [SerializeField] private Transform rightBackWheel;
+
     private MerchantBuySection merchantBuySection;
 
     private enum State { AtFarm, Leaving, Away, Arriving }
@@ -60,6 +67,13 @@ public class MerchantBehavior : MonoBehaviour
     private bool DriveTo(Vector3 target)
     {
         transform.position = Vector3.MoveTowards(transform.position, target, driveSpeed * Time.deltaTime);
+        Vector3 distance = transform.position - target;
+
+        leftFrontWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90, 0);
+        rightFrontWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90,0);
+        leftBackWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90, 0);
+        rightBackWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90, 0);
+
         return transform.position == target;
     }
 
@@ -67,7 +81,8 @@ public class MerchantBehavior : MonoBehaviour
     {
         state = State.AtFarm;
         timer = timerBeforeLeaving;
-        merchantBuySection.Restock();
+        if(state == State.Arriving)
+            merchantBuySection.Restock();
     }
 
     private void EnterAway()

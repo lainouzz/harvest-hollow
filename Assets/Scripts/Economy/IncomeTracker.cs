@@ -52,6 +52,9 @@ public class IncomeTracker : MonoBehaviour
 
     private void OnDayChanged(int day)
     {
+        /*TODO: 
+         Create a end of day/next time UI if all profit, total spent and display day and time*/
+
         daysMeasured++;
         totalEarned += earnedToday;
         totalSpent += spentToday;

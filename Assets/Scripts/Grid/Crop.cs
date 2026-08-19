@@ -13,7 +13,7 @@ public class Crop : MonoBehaviour
     [SerializeField] private GameObject[] stages;
 
     [Tooltip("Fired once when the crop becomes fully grown — hook a sparkle / sound / icon.")]
-    [SerializeField] private UnityEvent onGrown;
+    [SerializeField] private UnityEvent onGrown = new UnityEvent();
 
     private CropData data;
     private float grownDays;             // growth accumulated so far, in days
@@ -23,6 +23,7 @@ public class Crop : MonoBehaviour
 
     public bool IsGrown { get; private set; }
     public CropData Data => data;
+    public UnityEvent  OnGrown => onGrown;
 
     // Which cell this crop is planted on (handy for UI / lookups).
     public Vector2Int GridPosition { get; private set; }
@@ -66,7 +67,7 @@ public class Crop : MonoBehaviour
         if (Progress >= 1f)
         {
             IsGrown = true;
-            onGrown?.Invoke();
+            OnGrown?.Invoke();
         }
     }
 

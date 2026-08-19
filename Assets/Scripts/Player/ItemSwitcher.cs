@@ -62,10 +62,16 @@ public class ItemSwitcher : MonoBehaviour
         // Can't switch mid-animation, so the tool anim never gets cut off / stuck.
         if (!CanSwitch) return;
 
-        if (inputActions.Player.Next.WasPressedThisFrame())
-            Cycle(1);
-        else if (inputActions.Player.Previous.WasPressedThisFrame())
-            Cycle(-1);
+        if (inputActions.Player.Hotbar1.WasPressedThisFrame())
+            SelectSlot(0);
+        if (inputActions.Player.Hotbar2.WasPressedThisFrame())
+            SelectSlot(1);
+        if (inputActions.Player.Hotbar3.WasPressedThisFrame())
+            SelectSlot(2);
+        if (inputActions.Player.Hotbar4.WasPressedThisFrame())
+            SelectSlot(3);
+        if (inputActions.Player.Hotbar5.WasPressedThisFrame())
+            SelectSlot(4);
     }
 
     // Blocks switching for `seconds`. Overlapping locks extend, never shorten,
@@ -75,12 +81,12 @@ public class ItemSwitcher : MonoBehaviour
         switchUnlockTime = Mathf.Max(switchUnlockTime, Time.time + seconds);
     }
 
-    private void Cycle(int direction)
+    private void SelectSlot(int index)
     {
-        if (items.Length == 0) return;
+        if (index >= items.Length)
+            return;
 
-        // + items.Length keeps the result positive when cycling backwards.
-        Equip((currentIndex + direction + items.Length) % items.Length);
+        Equip(index);//
     }
 
     public void Equip(int index)

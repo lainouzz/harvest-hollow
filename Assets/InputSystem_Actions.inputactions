@@ -60,19 +60,46 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Previous",
+                    "name": "Hotbar1",
                     "type": "Button",
                     "id": "2776c80d-3c14-4091-8c56-d04ced07a2b0",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Next",
+                    "name": "Hotbar2",
                     "type": "Button",
                     "id": "b7230bb6-fc9b-4f52-8b25-f5e19cb2c2ba",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar3",
+                    "type": "Button",
+                    "id": "505dde64-6278-4dd3-a7b0-80c9e5fe21e4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar4",
+                    "type": "Button",
+                    "id": "b0f9723a-9aee-4df8-9e26-2d0bdba1045a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar5",
+                    "type": "Button",
+                    "id": "84ce3d7d-ad4e-49d0-a09a-5a34aec9c3c1",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -315,7 +342,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Next",
+                    "action": "Hotbar2",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -326,7 +353,73 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Next",
+                    "action": "Hotbar2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "60d876bf-92a5-4f3c-b08f-663df0f055e5",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Hotbar3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0b89835d-c812-4e86-8d8f-fb31b2610310",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Hotbar3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50245b45-4cf9-40b5-80b3-78bb29199b50",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Hotbar4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9fe1b118-fbe0-4a59-b166-e54415b74fc5",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Hotbar4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b8331690-e27a-4349-975f-fd4ff5236b35",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Hotbar5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8ade5f90-3a15-434b-98b0-394f39fed906",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Hotbar5",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -403,7 +496,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Previous",
+                    "action": "Hotbar1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -414,7 +507,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Previous",
+                    "action": "Hotbar1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
