@@ -11,7 +11,7 @@ public class MerchantBehavior : MonoBehaviour
 
     [SerializeField] private Transform startPos;
     [SerializeField] private Transform endPos;
-    [SerializeField] private GameObject CarPrefab;
+    [SerializeField] private GameObject carPrefab;
 
     [SerializeField] private float wheelSpinMultiplier;
 
@@ -31,7 +31,7 @@ public class MerchantBehavior : MonoBehaviour
         if(merchantBuySection == null) merchantBuySection = FindAnyObjectByType<MerchantBuySection>();
 
         transform.position = startPos.position;
-        if (CarPrefab != null) CarPrefab.SetActive(true);
+        if (carPrefab != null) carPrefab.SetActive(true);
         EnterAtFarm();
     }
 
@@ -68,7 +68,9 @@ public class MerchantBehavior : MonoBehaviour
     {
         transform.position = Vector3.MoveTowards(transform.position, target, driveSpeed * Time.deltaTime);
         Vector3 distance = transform.position - target;
-
+        
+        transform.LookAt(target);
+        
         leftFrontWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90, 0);
         rightFrontWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90,0);
         leftBackWheel.rotation = Quaternion.Euler(distance.x * wheelSpinMultiplier, 90, 0);
@@ -89,12 +91,12 @@ public class MerchantBehavior : MonoBehaviour
     {
         state = State.Away;
         timer = timerBeforeArriving;
-        if (CarPrefab != null) CarPrefab.SetActive(false);
+        if (carPrefab != null) carPrefab.SetActive(false);
     }
 
     private void EnterArriving()
     {
         state = State.Arriving;
-        if (CarPrefab != null) CarPrefab.SetActive(true);
+        if (carPrefab != null) carPrefab.SetActive(true);
     }
 }

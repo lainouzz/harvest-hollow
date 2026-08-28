@@ -456,7 +456,7 @@ public class FarmGrid : MonoBehaviour
         if (!placed.TryGetValue(id, out PlacedObjectData po) || po.instance == null) return;
 
         TileStatusIcon icon = po.instance.GetComponentInChildren<TileStatusIcon>(true);
-        if (icon != null) icon.Show(GetStatus(cell)); Debug.Log("Showing icon" + icon);
+        if (icon != null) icon.Show(GetStatus(cell));
     }
 }
 
