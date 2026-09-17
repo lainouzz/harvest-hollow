@@ -13,6 +13,10 @@ public class PlantingController : MonoBehaviour
     [Tooltip("Decides what a left-click does. Leave empty to find it in the scene.")]
     [SerializeField] private ItemSwitcher itemSwitcher;
 
+    [Tooltip("Plays dirt/water particles on a successful action. Leave empty to find it.")]
+    [SerializeField] private ToolVFXPlayer vfx;
+    [SerializeField] private ParticleSystem wateringCanVFX;
+
     [Tooltip("Layer(s) the grid ground sits on. The ray only hits these.")]
     [SerializeField] private LayerMask groundMask;
 
@@ -44,6 +48,7 @@ public class PlantingController : MonoBehaviour
         if (playerCamera == null) playerCamera = Camera.main;
         if (itemSwitcher == null) itemSwitcher = FindAnyObjectByType<ItemSwitcher>();
         if (playerLook == null) playerLook = FindAnyObjectByType<PlayerLook>();
+        if (vfx == null) vfx = FindAnyObjectByType<ToolVFXPlayer>();
 
         inventory = FindFirstObjectByType<InventoryManager>(FindObjectsInactive.Include);
     }
@@ -93,6 +98,14 @@ public class PlantingController : MonoBehaviour
 
     private void Update()
     {
+        // Don't act on the world while a menu is open (inventory/shop) or the game is
+        // paused — otherwise the click that selects an inventory item also plants.
+        if (IsBlocked())
+        {
+            if (cellHighlight != null) cellHighlight.SetActive(false);
+            return;
+        }
+
         UpdateAimedCell();
         UpdateHighlight();
 
@@ -102,28 +115,43 @@ public class PlantingController : MonoBehaviour
             HandleLeftClick(currentItem);
     }
 
-    // What a left-click does depends on what you're holding.
+    private bool IsBlocked()
+    {
+        if (Time.timeScale == 0f) return true;                  // paused
+        return playerLook != null && playerLook.isInShopUI;     // inventory or shop open
+    }
+
+    // What a left-click does depends on what you're holding. VFX only fires when the
+    // action actually succeeds (the grid Try* methods return false on a no-op).
     private void HandleLeftClick(ItemsInHand item)
     {
+        Vector3 pos = grid.GridToWorld(aimedCell);
+
         switch (item)
         {
             case ItemsInHand.Hoe:
                 if (!grid.IsCellOccupied(aimedCell))
-                    TryPlantAimed();
-                else
-                    grid.TryTill(aimedCell);
+                {
+                    if (TryPlantAimed()) PlayVFX(ToolVFXPlayer.ToolVFX.Till, pos);
+                }
+                else if (grid.TryTill(aimedCell))
+                    PlayVFX(ToolVFXPlayer.ToolVFX.Till, pos);
                 break;
 
             case ItemsInHand.WaterCan:
-                grid.TryWater(aimedCell);
+                if (grid.TryWater(aimedCell))
+                    PlayVFX(ToolVFXPlayer.ToolVFX.Water, pos);
+                    wateringCanVFX.Play();
                 break;
 
             case ItemsInHand.Seeds:
-                TryPlantSelectedSeed();
+                if (TryPlantSelectedSeed())
+                    PlayVFX(ToolVFXPlayer.ToolVFX.Plant, pos);
                 break;
 
             case ItemsInHand.HarvestTool:
-                grid.HarvestAt(aimedCell);
+                if (grid.HarvestAt(aimedCell))
+                    PlayVFX(ToolVFXPlayer.ToolVFX.Harvest, pos);
                 break;
 
             case ItemsInHand.None:
@@ -132,6 +160,11 @@ public class PlantingController : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private void PlayVFX(ToolVFXPlayer.ToolVFX action, Vector3 pos)
+    {
+        if (vfx != null) vfx.Play(action, pos);
     }
 
     private void UpdateAimedCell()
@@ -150,31 +183,36 @@ public class PlantingController : MonoBehaviour
         hasAimedCell = true;
     }
 
-    private void TryPlantAimed()
+    private bool TryPlantAimed()
     {
         if (selectedCrop == null)
         {
             Debug.LogWarning("PlantingController: no crop selected.", this);
-            return;
+            return false;
         }
 
-        grid.TryPlant(aimedCell, selectedCrop);
+        return grid.TryPlant(aimedCell, selectedCrop);
     }
 
     // Plants the selected seed and consumes one from the inventory — but only if
     // the plant actually happened. No seed in stock = can't plant.
-    private void TryPlantSelectedSeed()
+    private bool TryPlantSelectedSeed()
     {
         if (!HasSeedInStock())
         {
             Debug.Log(selectedSeed == null
                 ? "No seed selected — pick one from the inventory."
                 : $"Out of {selectedSeed.cropName} seeds.");
-            return;
+            return false;
         }
 
         if (grid.TryPlantSeed(aimedCell, selectedSeed))
+        {
             inventory.Remove(selectedSeedItem, 1);
+            return true;
+        }
+
+        return false;
     }
 
     private bool HasSeedInStock()

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 // Drives the merchant between the farm and an off-map point, waiting at each end.
@@ -22,8 +23,15 @@ public class MerchantBehavior : MonoBehaviour
 
     private MerchantBuySection merchantBuySection;
 
-    private enum State { AtFarm, Leaving, Away, Arriving }
-    private State state;
+    public enum State { AtFarm, Leaving, Away, Arriving }
+
+    // Fired whenever the truck changes state so effects can react (see MerchantSFX/MerchantVFX).
+    public event Action<State> OnStateChanged;
+    public State CurrentState { get; private set; }
+
+    // True while the truck is actually moving.
+    public bool IsDriving => CurrentState == State.Leaving || CurrentState == State.Arriving;
+
     private float timer;
 
     private void Start()
@@ -37,10 +45,10 @@ public class MerchantBehavior : MonoBehaviour
 
     private void Update()
     {
-        switch (state)
+        switch (CurrentState)
         {
             case State.AtFarm:
-                if (Countdown()) state = State.Leaving;
+                if (Countdown()) EnterLeaving();
                 break;
 
             case State.Leaving:
@@ -81,22 +89,37 @@ public class MerchantBehavior : MonoBehaviour
 
     private void EnterAtFarm()
     {
-        state = State.AtFarm;
+        // Restock only when the truck has just driven back (not on the first spawn).
+        bool returned = CurrentState == State.Arriving;
+
+        SetState(State.AtFarm);
         timer = timerBeforeLeaving;
-        if(state == State.Arriving)
+
+        if (returned && merchantBuySection != null)
             merchantBuySection.Restock();
+    }
+
+    private void EnterLeaving()
+    {
+        SetState(State.Leaving);
     }
 
     private void EnterAway()
     {
-        state = State.Away;
+        SetState(State.Away);
         timer = timerBeforeArriving;
         if (carPrefab != null) carPrefab.SetActive(false);
     }
 
     private void EnterArriving()
     {
-        state = State.Arriving;
+        SetState(State.Arriving);
         if (carPrefab != null) carPrefab.SetActive(true);
+    }
+
+    private void SetState(State next)
+    {
+        CurrentState = next;
+        OnStateChanged?.Invoke(next);
     }
 }

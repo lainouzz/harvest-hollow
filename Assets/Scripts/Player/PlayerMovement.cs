@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -28,6 +29,15 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private LayerMask layerMask;
 
+    //----------Footsteps----------
+    [SerializeField] private List<AudioClip> audioClips;
+    [SerializeField] private AudioSource footstepSource;
+    [Tooltip("Seconds between footsteps while walking.")]
+    [SerializeField] private float stepInterval = 0.45f;
+
+    private float stepTimer;
+    private int lastStepIndex = -1;
+
     private Vector3 velocity = Vector3.zero;
 
     private GameInput inputActions;
@@ -37,13 +47,12 @@ public class PlayerMovement : MonoBehaviour
     {
         inputActions = new GameInput();
         controller = GetComponent<CharacterController>();
+        if (footstepSource == null) footstepSource = GetComponent<AudioSource>();
     }
 
     private void OnEnable() => inputActions.Enable();
     private void OnDisable() => inputActions.Disable();
 
-    // CharacterController has no physics interpolation, so moving it in FixedUpdate
-    // makes it step at the physics rate and jitter. Drive it in Update instead.
     private void Update()
     {
         UpdateGrounded();
@@ -54,6 +63,7 @@ public class PlayerMovement : MonoBehaviour
 
         ApplyGravity();
         Move();
+        HandleFootsteps();
     }
 
     private void UpdateGrounded()
@@ -94,5 +104,41 @@ public class PlayerMovement : MonoBehaviour
 
         jumpBufferCounter = 0;
         coyoteCounter = 0;
+    }
+
+    private void HandleFootsteps()
+    {
+        // Only step when actually moving along the ground (not into a wall / mid-air).
+        Vector3 horizontal = controller.velocity;
+        horizontal.y = 0f;
+        bool walking = isGrounded && horizontal.magnitude > 0.1f;
+
+        if (!walking)
+        {
+            stepTimer = 0f;   // next step fires instantly when you start moving again
+            return;
+        }
+
+        stepTimer -= Time.deltaTime;
+        if (stepTimer <= 0f)
+        {
+            PlayFootstep();
+            stepTimer = stepInterval;
+        }
+    }
+
+    private void PlayFootstep()
+    {
+        if (footstepSource == null || audioClips == null || audioClips.Count == 0) return;
+
+        int index = Random.Range(0, audioClips.Count);
+
+        // Avoid playing the same clip twice in a row so it sounds varied.
+        if (audioClips.Count > 1 && index == lastStepIndex)
+            index = (index + 1) % audioClips.Count;
+        lastStepIndex = index;
+
+        footstepSource.pitch = Random.Range(0.9f, 1.1f);   // tiny variation per step
+        footstepSource.PlayOneShot(audioClips[index]);
     }
 }

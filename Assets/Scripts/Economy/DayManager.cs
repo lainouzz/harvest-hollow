@@ -1,24 +1,20 @@
 using System;
-using Unity.VisualScripting;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-// Tracks the current day. For now a debug key steps it; a real day/night cycle
-// can call AdvanceDay() instead.
 public class DayManager : MonoBehaviour
 {
     public static DayManager Instance { get; private set; }
-
-    // Static so the many crops can subscribe without finding the manager.
     public static event Action<int> OnDayChanged;
 
-    public Transform lightTransform;
-
     [SerializeField] private int currentDay = 1;
-    [SerializeField] private float daySwitchTimer;
-    
+    [Tooltip("Seconds the player must stay in the sleep zone before the day advances.")]
+    [SerializeField] private float daySwitchTimer = 1.5f;
+    [SerializeField] private DayTransition transition;
+
     private float timer;
     private bool isInTrigger;
+    private bool isSwitching;
 
     public int CurrentDay => currentDay;
 
@@ -39,42 +35,56 @@ public class DayManager : MonoBehaviour
 
     private void Update()
     {
-        if (isInTrigger)
-        {
-            timer -= Time.deltaTime;
+        if (!isInTrigger || isSwitching) return;
 
-            if (timer <= 0f)
-            {
-                AdvanceDay();
-            }
-        }
-    }
-    
-    private bool Countdown()
-    {
         timer -= Time.deltaTime;
-        Debug.Log($"Time: {timer}"); 
-        return timer <= 0f;
+        if (timer <= 0f)
+            StartCoroutine(SleepRoutine());
     }
-    
+
+    private IEnumerator SleepRoutine()
+    {
+        isSwitching = true;
+
+        if (transition != null) yield return transition.FadeOut();
+
+        AdvanceDay();   // crops grow while the screen is black
+
+        // TODO: autosave here — the new day, wallet, inventory and grid are all settled
+        //       at this point. Call your save system once it exists (see SaveManager).
+
+        if (transition != null)
+        {
+            transition.SetDay(currentDay);
+            yield return transition.Hold();
+            yield return transition.FadeIn();
+        }
+
+        isInTrigger = false;
+        isSwitching = false;
+    }
+
     private void AdvanceDay()
     {
         currentDay++;
-
-        Debug.Log($"Day {currentDay}");
         OnDayChanged?.Invoke(currentDay);
-
-        isInTrigger = false;
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isSwitching) return;
+
         if (other.CompareTag("Player"))
         {
             isInTrigger = true;
             timer = daySwitchTimer;
-
-            Debug.Log($"Day change in {timer} seconds");
         }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        // Walking out of the zone cancels a pending switch.
+        if (other.CompareTag("Player"))
+            isInTrigger = false;
     }
 }

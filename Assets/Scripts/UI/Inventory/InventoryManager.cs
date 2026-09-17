@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using static UnityEditor.Progress;
 
 // Holds the player's items as stacks (item + count) and rebuilds the UI list on change.
 public class InventoryManager : MonoBehaviour
@@ -21,13 +22,20 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject itemPrefab;
 
     [Tooltip("Items the player starts with (e.g. Potato x10, Wheat x5).")]
-    [SerializeField] private List<Stack> startingItems = new();
+    [SerializeField] public List<Stack> startingItems = new();
 
     private readonly List<Stack> stacks = new();
     public IReadOnlyList<Stack> Stacks => stacks;
 
     public event Action OnChanged;
     public event Action<InventoryItem> OnItemSelected;
+    public InventoryItem SelectedItem { get; private set; }
+
+    public void Select(InventoryItem item)
+    {
+        SelectedItem = item;
+        OnItemSelected?.Invoke(item);
+    }
 
     private void Awake()
     {
@@ -87,6 +95,19 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
+    public int GetItemCount(InventoryItem item)
+    {
+        foreach (Stack s in stacks)
+        {
+            if(s.item == item)
+            {
+                return s.count;
+            }
+        }
+
+        return 0;
+    }
+
     private void Changed()
     {
         OnChanged?.Invoke();
@@ -106,11 +127,12 @@ public class InventoryManager : MonoBehaviour
 
             if (obj.TryGetComponent(out ItemController row))
             {
+
                 Stack captured = stack;   // capture for the button callbacks
                 row.Setup(
                     captured.item,
                     captured.count,
-                    onSelect: () => OnItemSelected?.Invoke(captured.item),
+                    onSelect: () => Select(captured.item),
                     onRemove: () => Remove(captured.item, captured.count));
             }
         }
