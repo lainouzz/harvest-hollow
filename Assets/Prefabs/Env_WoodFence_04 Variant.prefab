@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Env_WoodFence_04 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 1498886399943132032, guid: 6d94d7893372bb4409e9168c2ded88c0, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 2271729088365730106, guid: 6d94d7893372bb4409e9168c2ded88c0, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.33014822

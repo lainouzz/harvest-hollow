@@ -6,8 +6,6 @@ using UnityEngine.Audio;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-// Reads/writes every control on the settings panel, applies it live, and remembers
-// it via PlayerPrefs so the choices survive a restart.
 public class SettingsMenu : MonoBehaviour
 {
     [Header("Audio")]
@@ -41,7 +39,7 @@ public class SettingsMenu : MonoBehaviour
     {
         BuildQualityOptions();
         BuildResolutionOptions();
-        LoadValues();   // sets the controls' visuals + non-audio settings, no mixer writes yet
+        LoadValues();
 
         // Wire up after loading so restoring the values doesn't fire callbacks.
         if (masterSlider != null) masterSlider.onValueChanged.AddListener(SetMasterVolume);

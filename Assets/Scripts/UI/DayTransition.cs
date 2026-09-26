@@ -2,12 +2,10 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-// The "sleep" screen shown while the day advances: fades a full-screen overlay to
-// black, shows the new day, then fades back. Keeps the baked lighting untouched.
 public class DayTransition : MonoBehaviour
 {
-    [SerializeField] private CanvasGroup group;      // full-screen black overlay
-    [SerializeField] private TMP_Text dayLabel;      // "Day 3" etc.
+    [SerializeField] private CanvasGroup group;
+    [SerializeField] private TMP_Text dayLabel;
     [SerializeField] private float fadeDuration = 0.6f;
     [SerializeField] private float holdDuration = 1.2f;
 
@@ -34,7 +32,7 @@ public class DayTransition : MonoBehaviour
     {
         if (group == null) yield break;
 
-        group.blocksRaycasts = true;   // eat clicks while covering the screen
+        group.blocksRaycasts = true;
         float t = 0f;
         while (t < fadeDuration)
         {

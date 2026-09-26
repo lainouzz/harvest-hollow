@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using UnityEngine;
-using Color = UnityEngine.Color;
-
 
 public class FarmGrid : MonoBehaviour
 {
@@ -21,33 +18,39 @@ public class FarmGrid : MonoBehaviour
     [SerializeField] private int startWidth = 3;
     [SerializeField] private int startHeight = 3;
 
+    [Header("Fence")]
+    [Tooltip("Fence sides that start open, e.g. the farm entrance.")]
+    [SerializeField] private List<FenceOpening> startingOpenings = new()
+    {
+        new FenceOpening { cell = Vector2Int.zero, side = FenceSide.Left }
+    };
+
     private GridCellData[,] cells;
 
-    // id -> what's planted there. id is also stored on each occupied cell so we
-    // can look up a planted object from any cell it covers.
+    // Each open fence side is stored once, as the right or top edge of a cell, so
+    // the same gap is found whichever side of the fence you look at it from.
+    private readonly HashSet<Vector3Int> fenceOpenings = new();
+
     private readonly Dictionary<string, PlacedObjectData> placed = new();
 
-    // Every crop currently growing. Read this for UI (progress bars, counts, etc).
     private readonly List<Crop> plantedCrops = new();
     public IReadOnlyList<Crop> PlantedCrops => plantedCrops;
 
-    private Wallet wallet;   // found lazily; used for the placeholder harvest reward
+    private Wallet wallet;
 
     public Vector3 Origin => transform.position;
     public int Width => gridWidth;
     public int Height => gridHeight;
     public float CellSize => cellSize;
     
-    // Distance from one cell's start to the next: the cell itself, plus the gap.
-    // Gap of 0 = cells touch (so it works fine before you ever set a spacing).
     public float StepX => cellSize + cellSpacing.x;
     public float StepZ => cellSize + cellSpacing.z;
 
     public event Action<Vector2Int, TileState> OnCellStateChanged;
 
-    // Raised when the playable area changes (a slot was bought). The visualizer
-    // and any buy-UI listen so they can redraw.
     public event Action OnGridChanged;
+
+    public event Action OnFenceChanged;
 
     private void Awake()
     {
@@ -70,11 +73,11 @@ public class FarmGrid : MonoBehaviour
                 };
             }
         }
-    }
 
-    // ---------------------------------------------------------------
-    // Planting / removal API — called by PlantingController.
-    // ---------------------------------------------------------------
+        fenceOpenings.Clear();
+        foreach (FenceOpening o in startingOpenings)
+            fenceOpenings.Add(EdgeKey(o.cell, SideToDir(o.side)));
+    }
 
     public bool TryPlant(Vector2Int cell, CropData crop)
     {
@@ -84,7 +87,6 @@ public class FarmGrid : MonoBehaviour
         Vector3 worldPos = GridToWorld(cell, crop.size);
         GameObject instance = Instantiate(crop.prefab, worldPos, Quaternion.Euler(-90, 0, 0), transform);
         
-        // Freshly placed ground starts untilled.
         if (instance.TryGetComponent(out GroundTile groundTile))
             groundTile.SetState(TileState.Untilled);
            
@@ -104,37 +106,36 @@ public class FarmGrid : MonoBehaviour
         return true;
     }
 
-    // Plants a crop ON an existing tile (the crop is a separate layer from the
-    // tile — the tile stays put underneath). Watered soil gives a growth + yield
-    // boost. Returns false if the cell isn't ready or already has a crop.
     public bool TryPlantSeed(Vector2Int cell, CropData crop)
     {
         if (crop == null || crop.prefab == null) return false;
         if (!CanPlantSeed(cell)) return false;
 
-        GridCellData data = cells[cell.x, cell.y];
+        bool watered = cells[cell.x, cell.y].state == TileState.Watered;
+        float growthMultiplier = watered ? crop.wateredGrowthMultiplier : 1f;
+        int bonusYield = watered ? crop.wateredYieldBonus : 0;
 
+        SpawnCrop(cell, crop, growthMultiplier, bonusYield);
+        return true;
+    }
+
+    private Crop SpawnCrop(Vector2Int cell, CropData crop, float growthMultiplier, int bonusYield)
+    {
         Vector3 worldPos = GridToWorld(cell, crop.size) + Vector3.up * 0.1f;
         GameObject instance = Instantiate(crop.prefab, worldPos, Quaternion.Euler(-90, 0, 0), transform);
 
         if (!instance.TryGetComponent(out Crop cropComponent))
             cropComponent = instance.AddComponent<Crop>();
 
-        // Watered soil -> faster growth and extra yield.
-        bool watered = data.state == TileState.Watered;
-        float growthMultiplier = watered ? crop.wateredGrowthMultiplier : 1f;
-        int bonusYield = watered ? crop.wateredYieldBonus : 0;
-
         cropComponent.Initialize(crop, cell, growthMultiplier, bonusYield);
 
-        data.crop = cropComponent;
+        cells[cell.x, cell.y].crop = cropComponent;
         plantedCrops.Add(cropComponent);
         cropComponent.OnGrown.AddListener(() => RefreshStatus(cell));
-        RefreshStatus(cell);   // clear the "needs water" icon now something's planted
-        return true;
+        RefreshStatus(cell);
+        return cropComponent;
     }
 
-    // Can a seed go here? Needs a tilled/watered tile with nothing growing yet.
     public bool CanPlantSeed(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
@@ -166,8 +167,6 @@ public class FarmGrid : MonoBehaviour
         return true;
     }
 
-    // Harvests a fully-grown crop: drops its produce into the inventory, removes
-    // the plant, and leaves the tile behind so you can replant.
     public bool HarvestAt(Vector2Int cell)
     {
         if (!CanHarvest(cell)) return false;
@@ -177,14 +176,13 @@ public class FarmGrid : MonoBehaviour
 
         Debug.Log($"Harvested {crop.Data.cropName} x{crop.Yield}!");
 
-        // Drop this crop's own produce into the inventory, yield-many of it.
         if (InventoryManager.Instance != null && crop.Data.produce != null)
             InventoryManager.Instance.Add(crop.Data.produce, crop.Yield);
 
         plantedCrops.Remove(crop);
         Destroy(crop.gameObject);
         data.crop = null;
-        RefreshStatus(cell);   // clear the "ready to harvest" icon
+        RefreshStatus(cell);
 
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
         if (wallet != null) wallet.Add(10);
@@ -192,7 +190,6 @@ public class FarmGrid : MonoBehaviour
         return true;
     }
 
-    // Can the harvest tool act here? Only if a grown crop is present.
     public bool CanHarvest(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
@@ -211,30 +208,25 @@ public class FarmGrid : MonoBehaviour
         return placed.TryGetValue(id, out data);
     }
 
-    // Tills a placed, untilled tile: Untilled -> Tilled. Needs a tile there
-    // first (you place it, then hoe it). Updates the tile's visual.
     public bool TryTill(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
 
         GridCellData data = cells[cell.x, cell.y];
-        if (!data.isOccupied) return false;                // nothing to till yet
-        if (data.state != TileState.Untilled) return false; // only raw ground
+        if (!data.isOccupied) return false;
+        if (data.state != TileState.Untilled) return false;
 
         SetCellState(cell, data, TileState.Tilled);
         return true;
     }
 
-    // Waters tilled soil: Tilled -> Watered.
-    // TODO: visual only for now — nothing consumes the water yet. Real logic
-    //       (drying out each day, gating Crop growth) comes next.
     public bool TryWater(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
 
         GridCellData data = cells[cell.x, cell.y];
         if (!data.isOccupied) return false;
-        if (data.state != TileState.Tilled) return false; // must be tilled first
+        if (data.state != TileState.Tilled) return false;
 
         SetCellState(cell, data, TileState.Watered);
         return true;
@@ -244,7 +236,6 @@ public class FarmGrid : MonoBehaviour
     {
         data.state = state;
 
-        // Tell the placed tile to switch its look.
         if (placed.TryGetValue(data.id, out PlacedObjectData po) &&
             po.instance != null &&
             po.instance.TryGetComponent(out GroundTile tile))
@@ -274,17 +265,11 @@ public class FarmGrid : MonoBehaviour
         return cells[cell.x, cell.y].state == TileState.Watered;
     }
 
-    // ---------------------------------------------------------------
-    // Grid math
-    // ---------------------------------------------------------------
-
-    // Center of a single cell.
     public Vector3 GridToWorld(Vector2Int gridPos)
     {
         return GridToWorld(gridPos, Vector2Int.one);
     }
 
-    // Center of a multi-cell object whose bottom-left cell is gridPos.
     public Vector3 GridToWorld(Vector2Int gridPos, Vector2Int size)
     {
         return new Vector3(
@@ -330,7 +315,7 @@ public class FarmGrid : MonoBehaviour
             {
                 Vector2Int cell = new Vector2Int(gridPos.x + x, gridPos.y + z);
                 if (!IsInsideGrid(cell) ||
-                    !cells[cell.x, cell.y].isUnlocked ||   // can't build on locked ground
+                    !cells[cell.x, cell.y].isUnlocked ||
                     cells[cell.x, cell.y].isOccupied)
                     return false;
             }
@@ -344,7 +329,6 @@ public class FarmGrid : MonoBehaviour
         return cells[cell.x, cell.y].isUnlocked;
     }
 
-    // A locked cell that touches an unlocked one — i.e. the next ring you can buy.
     public bool IsPurchasable(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return false;
@@ -380,9 +364,50 @@ public class FarmGrid : MonoBehaviour
         if (!IsPurchasable(cell)) return false;
 
         cells[cell.x, cell.y].isUnlocked = true;
+
+        // Any opening this plot swallowed is now inside the farm, so forget it.
+        foreach (Vector2Int dir in FenceSides)
+            if (!IsFencePerimeter(cell, dir)) fenceOpenings.Remove(EdgeKey(cell, dir));
+
         OnGridChanged?.Invoke();
         return true;
     }
+
+    public static readonly Vector2Int[] FenceSides =
+        { Vector2Int.right, Vector2Int.up, Vector2Int.left, Vector2Int.down };
+
+    // A fence side is one where the farm meets the outside: exactly one of the two
+    // cells it separates is unlocked.
+    public bool IsFencePerimeter(Vector2Int cell, Vector2Int dir) =>
+        IsUnlocked(cell) != IsUnlocked(cell + dir);
+
+    public bool IsFenceOpen(Vector2Int cell, Vector2Int dir) =>
+        fenceOpenings.Contains(EdgeKey(cell, dir));
+
+    public bool SetFenceOpen(Vector2Int cell, Vector2Int dir, bool open)
+    {
+        if (!IsFencePerimeter(cell, dir)) return false;
+
+        Vector3Int key = EdgeKey(cell, dir);
+        bool changed = open ? fenceOpenings.Add(key) : fenceOpenings.Remove(key);
+        if (changed) OnFenceChanged?.Invoke();
+        return changed;
+    }
+
+    private static Vector3Int EdgeKey(Vector2Int cell, Vector2Int dir)
+    {
+        if (dir == Vector2Int.left) return new Vector3Int(cell.x - 1, cell.y, 0);
+        if (dir == Vector2Int.down) return new Vector3Int(cell.x, cell.y - 1, 1);
+        return new Vector3Int(cell.x, cell.y, dir == Vector2Int.right ? 0 : 1);
+    }
+
+    private static Vector2Int SideToDir(FenceSide side) => side switch
+    {
+        FenceSide.Right => Vector2Int.right,
+        FenceSide.Up => Vector2Int.up,
+        FenceSide.Left => Vector2Int.left,
+        _ => Vector2Int.down
+    };
 
     private void OccupyCells(Vector2Int gridPos, Vector2Int size, string id)
     {
@@ -437,6 +462,117 @@ public class FarmGrid : MonoBehaviour
         }
     }
     
+    public void CaptureState(SaveData save)
+    {
+        save.unlockedCells.Clear();
+        save.tiles.Clear();
+        save.tileStates.Clear();
+        save.crops.Clear();
+        save.fenceOpenings.Clear();
+
+        foreach (Vector3Int key in fenceOpenings)
+            save.fenceOpenings.Add(new EdgeSave { x = key.x, z = key.y, axis = key.z });
+
+        for (int x = 0; x < gridWidth; ++x)
+        {
+            for (int z = 0; z < gridHeight; ++z)
+            {
+                GridCellData c = cells[x, z];
+
+                if (c.isUnlocked)
+                    save.unlockedCells.Add(new CellSave { x = x, z = z });
+
+                if (c.isOccupied && c.state != TileState.Untilled)
+                    save.tileStates.Add(new StateSave { x = x, z = z, state = (int)c.state });
+
+                if (c.crop != null && c.crop.Data != null)
+                {
+                    save.crops.Add(new CropSave
+                    {
+                        x = x,
+                        z = z,
+                        crop = c.crop.Data.name,
+                        grownDays = c.crop.GrownDays,
+                        growthPerDay = c.crop.GrowthPerDay,
+                        bonusYield = c.crop.BonusYield
+                    });
+                }
+            }
+        }
+
+        foreach (PlacedObjectData po in placed.Values)
+        {
+            if (po.crop != null)
+                save.tiles.Add(new TileSave { x = po.gridPosition.x, z = po.gridPosition.y, tile = po.crop.name });
+        }
+    }
+
+    // Rebuilds the farm from a save: unlocked plots first, then tiles, then their
+    // tilled/watered state, then the crops growing on them (order matters — each
+    // step needs the previous one in place).
+    public void RestoreState(SaveData save, SaveDatabase db)
+    {
+        ClearAll();
+
+        if (save.unlockedCells.Count > 0)
+        {
+            foreach (GridCellData c in cells) c.isUnlocked = false;
+
+            foreach (CellSave c in save.unlockedCells)
+                if (IsInsideGrid(new Vector2Int(c.x, c.z))) cells[c.x, c.z].isUnlocked = true;
+        }
+
+        if (save.fenceOpenings != null)
+        {
+            fenceOpenings.Clear();
+            foreach (EdgeSave e in save.fenceOpenings)
+                fenceOpenings.Add(new Vector3Int(e.x, e.z, e.axis));
+        }
+
+        foreach (TileSave t in save.tiles)
+            TryPlant(new Vector2Int(t.x, t.z), db.FindCrop(t.tile));
+
+        foreach (StateSave s in save.tileStates)
+        {
+            Vector2Int cell = new Vector2Int(s.x, s.z);
+            if (!IsInsideGrid(cell) || !cells[s.x, s.z].isOccupied) continue;
+
+            SetCellState(cell, cells[s.x, s.z], (TileState)s.state);
+        }
+
+        foreach (CropSave c in save.crops)
+        {
+            Vector2Int cell = new Vector2Int(c.x, c.z);
+            CropData data = db.FindCrop(c.crop);
+            if (data == null || data.prefab == null || !CanPlantSeed(cell)) continue;
+
+            Crop crop = SpawnCrop(cell, data, c.growthPerDay, c.bonusYield);
+            crop.RestoreGrowth(c.grownDays);
+            RefreshStatus(cell);
+        }
+
+        OnGridChanged?.Invoke();
+    }
+
+    private void ClearAll()
+    {
+        foreach (Crop crop in plantedCrops)
+            if (crop != null) Destroy(crop.gameObject);
+        plantedCrops.Clear();
+
+        foreach (PlacedObjectData po in placed.Values)
+            if (po.instance != null) Destroy(po.instance);
+        placed.Clear();
+
+        foreach (GridCellData c in cells)
+        {
+            c.isOccupied = false;
+            c.id = null;
+            c.state = TileState.Untilled;
+            c.crop = null;
+        }
+    }
+
     public CellStatus GetStatus(Vector2Int cell)
     {
         GridCellData data = cells[cell.x, cell.y];
@@ -446,7 +582,6 @@ public class FarmGrid : MonoBehaviour
         return CellStatus.None;
     }
 
-    // Updates the icon on the tile at this cell (does nothing if no tile is there).
     private void RefreshStatus(Vector2Int cell)
     {
         if (!IsInsideGrid(cell)) return;
@@ -465,6 +600,15 @@ public enum TileState
     Untilled = 0,
     Tilled = 1,
     Watered = 2
+}
+
+public enum FenceSide { Right, Up, Left, Down }
+
+[Serializable]
+public struct FenceOpening
+{
+    public Vector2Int cell;
+    public FenceSide side;
 }
 
 public enum CellStatus

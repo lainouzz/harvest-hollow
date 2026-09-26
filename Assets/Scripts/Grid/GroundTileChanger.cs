@@ -1,10 +1,5 @@
 using UnityEngine;
 
-// TODO: this whole component currently does NOTHING. `tiles` is never filled (the
-//       old Spawn() is gone), so HandleCellStateChanged always early-outs. Tilling
-//       works because FarmGrid.TryTill talks to the placed tile's GroundTile directly.
-//       Decide: delete this, or bring back per-cell tile spawning (spawn a tile for
-//       every cell on Start) and drop the "left-click places a tile" step.
 [RequireComponent (typeof(FarmGrid))]
 public class GroundTileChanger : MonoBehaviour
 {
@@ -15,7 +10,6 @@ public class GroundTileChanger : MonoBehaviour
     private FarmGrid grid;
     private GroundTile[,] tiles;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
         grid = GetComponent<FarmGrid>();

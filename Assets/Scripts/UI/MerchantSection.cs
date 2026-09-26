@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// One thing the merchant offers (maxQuantity <= 0 = unlimited).
 public struct MerchantOffer
 {
     public InventoryItem item;
@@ -11,7 +10,6 @@ public struct MerchantOffer
     public int maxQuantity;
 }
 
-// Shared logic for a merchant list section. Subclasses supply the offers and the action.
 public abstract class MerchantSection : MonoBehaviour
 {
     [Header("Scene references")]

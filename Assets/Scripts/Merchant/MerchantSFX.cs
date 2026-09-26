@@ -1,60 +1,146 @@
+using System.Collections;
 using UnityEngine;
 
-// Reacts to the merchant's state: loops an engine sound while driving and honks the
-// horn on arrival and departure. Put this on the truck (alongside MerchantBehavior).
 [RequireComponent(typeof(MerchantBehavior))]
 public class MerchantSFX : MonoBehaviour
 {
-    [Header("Engine")]
-    [Tooltip("Looping engine source. Set Spatial Blend to 3D so it swells as you approach.")]
-    [SerializeField] private AudioSource engineSource;
+    [Header("Sources (set Output + 3D settings here, clips go below)")]
+    [SerializeField] private AudioSource idleSource;
+    [SerializeField] private AudioSource driveSource;
+    [SerializeField] private AudioSource oneShotSource;
 
-    [Header("Horn (one-shots)")]
-    [SerializeField] private AudioSource hornSource;
+    [Header("Engine clips")]
+    [SerializeField] private AudioClip idleLoop;
+    [SerializeField] private AudioClip driveStart;
+    [SerializeField] private AudioClip driveLoop;
+
+    [Header("Horn (optional)")]
     [SerializeField] private AudioClip arriveHorn;
     [SerializeField] private AudioClip leaveHorn;
 
-    private MerchantBehavior merchant;
+    [Header("Mix")]
+    [SerializeField, Range(0f, 1f)] private float idleVolume = 0.6f;
+    [SerializeField, Range(0f, 1f)] private float driveVolume = 1f;
+    [SerializeField] private float crossfadeTime = 0.5f;
+    [Tooltip("Start the drive loop this many seconds before the drive-start clip ends, so they overlap.")]
+    [SerializeField] private float startOverlap = 0.3f;
 
-    private void Awake() => merchant = GetComponent<MerchantBehavior>();
+    private MerchantBehavior merchant;
+    private Coroutine idleFade;
+    private Coroutine driveFade;
+    private Coroutine pendingDriveLoop;
+
+    private void Awake()
+    {
+        merchant = GetComponent<MerchantBehavior>();
+        SetupLoop(idleSource, idleLoop);
+        SetupLoop(driveSource, driveLoop);
+    }
 
     private void OnEnable() => merchant.OnStateChanged += OnStateChanged;
     private void OnDisable() => merchant.OnStateChanged -= OnStateChanged;
 
-    private void Start() => SetEngine(merchant.IsDriving);   // match whatever state we start in
+    private void Start() => ApplyState(merchant.CurrentState, fromEvent: false);
 
-    private void OnStateChanged(MerchantBehavior.State state)
+    private void OnStateChanged(MerchantBehavior.State state) => ApplyState(state, fromEvent: true);
+
+    private void ApplyState(MerchantBehavior.State state, bool fromEvent)
     {
         switch (state)
         {
-            case MerchantBehavior.State.Arriving:
-                SetEngine(true);
-                Honk(arriveHorn);
+            case MerchantBehavior.State.AtFarm:
+                CancelPendingDriveLoop();
+                FadeTo(idleSource, idleVolume, ref idleFade);
+                FadeTo(driveSource, 0f, ref driveFade);
                 break;
 
             case MerchantBehavior.State.Leaving:
-                SetEngine(true);
-                Honk(leaveHorn);
+                if (fromEvent) PlayOneShot(leaveHorn);
+                FadeTo(idleSource, 0f, ref idleFade);
+
+                if (fromEvent && driveStart != null)
+                {
+                    PlayOneShot(driveStart);
+                    CancelPendingDriveLoop();
+                    pendingDriveLoop = StartCoroutine(StartDriveLoopAfter(driveStart.length - startOverlap));
+                }
+                else
+                {
+                    FadeTo(driveSource, driveVolume, ref driveFade);
+                }
                 break;
 
-            case MerchantBehavior.State.AtFarm:
+            case MerchantBehavior.State.Arriving:
+                if (fromEvent) PlayOneShot(arriveHorn);
+                CancelPendingDriveLoop();
+                FadeTo(idleSource, 0f, ref idleFade);
+                FadeTo(driveSource, driveVolume, ref driveFade);
+                break;
+
             case MerchantBehavior.State.Away:
-                SetEngine(false);
+                CancelPendingDriveLoop();
+                FadeTo(idleSource, 0f, ref idleFade);
+                FadeTo(driveSource, 0f, ref driveFade);
                 break;
         }
     }
 
-    private void SetEngine(bool on)
+    private IEnumerator StartDriveLoopAfter(float delay)
     {
-        if (engineSource == null) return;
-
-        if (on && !engineSource.isPlaying) engineSource.Play();
-        else if (!on && engineSource.isPlaying) engineSource.Stop();
+        yield return new WaitForSeconds(Mathf.Max(0f, delay));
+        pendingDriveLoop = null;
+        FadeTo(driveSource, driveVolume, ref driveFade);
     }
 
-    private void Honk(AudioClip clip)
+    private void CancelPendingDriveLoop()
     {
-        if (hornSource != null && clip != null)
-            hornSource.PlayOneShot(clip);
+        if (pendingDriveLoop == null) return;
+        StopCoroutine(pendingDriveLoop);
+        pendingDriveLoop = null;
+    }
+
+    private void FadeTo(AudioSource source, float target, ref Coroutine running)
+    {
+        if (source == null) return;
+        if (running != null) StopCoroutine(running);
+        running = StartCoroutine(Fade(source, target));
+    }
+
+    private IEnumerator Fade(AudioSource source, float target)
+    {
+        if (target > 0f && !source.isPlaying)
+        {
+            source.volume = 0f;
+            source.Play();
+        }
+
+        float start = source.volume;
+        float t = 0f;
+        while (t < crossfadeTime)
+        {
+            t += Time.deltaTime;
+            source.volume = Mathf.Lerp(start, target, t / crossfadeTime);
+            yield return null;
+        }
+
+        source.volume = target;
+        if (target <= 0f) source.Stop();
+    }
+
+    private void PlayOneShot(AudioClip clip)
+    {
+        if (oneShotSource != null && clip != null)
+            oneShotSource.PlayOneShot(clip);
+    }
+
+    private static void SetupLoop(AudioSource source, AudioClip clip)
+    {
+        if (source == null) return;
+
+        source.clip = clip;
+        source.loop = true;
+        source.playOnAwake = false;
+        source.volume = 0f;
+        source.Stop();
     }
 }

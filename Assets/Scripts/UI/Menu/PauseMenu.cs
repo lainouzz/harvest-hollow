@@ -2,13 +2,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-// Esc toggles an in-game pause menu: freezes time, frees the cursor, and can open
-// the same settings panel. Esc also backs out of settings before closing the menu.
 public class PauseMenu : MonoBehaviour
 {
     [SerializeField] private GameObject pauseRoot;
-    [SerializeField] private GameObject settingsRoot;   // optional, nested under the pause menu
-    [SerializeField] private PlayerLook playerLook;     // to gate camera look while paused
+    [SerializeField] private GameObject settingsRoot;
+    [SerializeField] private PlayerLook playerLook;
     [SerializeField] private string mainMenuScene = "MainMenu";
 
     private bool isPaused;
@@ -28,7 +26,7 @@ public class PauseMenu : MonoBehaviour
         if (!isPaused && playerLook != null && playerLook.isInShopUI) return;
 
         if (isPaused && settingsRoot != null && settingsRoot.activeSelf)
-            CloseSettings();          // step back to the pause menu first
+            CloseSettings();
         else if (isPaused)
             Resume();
         else
@@ -85,7 +83,6 @@ public class PauseMenu : MonoBehaviour
 
     private void OnDisable()
     {
-        // Safety: if this object is torn down while paused, don't leave time stopped.
         if (isPaused) Time.timeScale = 1f;
     }
 }

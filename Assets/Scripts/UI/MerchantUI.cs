@@ -7,7 +7,6 @@ public class MerchantUI : MonoBehaviour
 
     [SerializeField] private PlayerLook playerLook;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         MerchantUIGameobject.gameObject.SetActive(false);

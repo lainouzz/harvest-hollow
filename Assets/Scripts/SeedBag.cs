@@ -1,8 +1,5 @@
 using UnityEngine;
 
-// Slides the seed mesh in the bag between "full" and "empty". "Full" is however
-// many of the selected seed you had when you picked it, so the bag starts full on
-// selection and drains as you plant.
 public class SeedBag : MonoBehaviour
 {
     [SerializeField] private Transform fullPos;
@@ -12,7 +9,7 @@ public class SeedBag : MonoBehaviour
 
     private InventoryManager inventory;
     private InventoryItem seedItem;
-    private int seedFullCount;          // count captured when this seed was picked
+    private int seedFullCount;
     private Vector3 targetLocalPos;
 
     private void Awake()
@@ -46,7 +43,6 @@ public class SeedBag : MonoBehaviour
             seedPrefab.localPosition, targetLocalPos, slideSpeed * Time.deltaTime);
     }
 
-    // A new seed is picked -> its current count becomes "full".
     private void SetSeed(InventoryItem item)
     {
         seedItem = item;
@@ -58,7 +54,6 @@ public class SeedBag : MonoBehaviour
     {
         int count = SeedCount();
 
-        // If you bought more, top the reference up so it still reads full.
         if (count > seedFullCount) seedFullCount = count;
 
         float percentage = seedFullCount > 0 ? Mathf.Clamp01((float)count / seedFullCount) : 0f;

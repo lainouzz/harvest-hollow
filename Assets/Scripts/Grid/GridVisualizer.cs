@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// Draws the grid lines at runtime so the board is visible in Play mode,
-// not just via the Scene-view gizmo. Attach next to a FarmGrid.
 [RequireComponent(typeof(FarmGrid))]
 public class GridVisualizer : MonoBehaviour
 {
@@ -23,7 +21,7 @@ public class GridVisualizer : MonoBehaviour
     private void OnEnable()
     {
         if (grid == null) grid = GetComponent<FarmGrid>();
-        grid.OnGridChanged += Rebuild;   // redraw when a slot is bought
+        grid.OnGridChanged += Rebuild;
     }
 
     private void OnDisable()
@@ -52,7 +50,6 @@ public class GridVisualizer : MonoBehaviour
 
         float cs = grid.CellSize;
 
-        // Draw unlocked cells solid, and buyable cells as faint "ghost" outlines.
         for (int x = 0; x < grid.Width; ++x)
         {
             for (int z = 0; z < grid.Height; ++z)
@@ -62,7 +59,7 @@ public class GridVisualizer : MonoBehaviour
                 Color color;
                 if (grid.IsUnlocked(cell)) color = lineColor;
                 else if (grid.IsPurchasable(cell)) color = purchasableColor;
-                else continue;   // fully locked & not adjacent — don't draw
+                else continue;
 
                 Vector3 corner = new Vector3(x * grid.StepX, 0f, z * grid.StepZ);
                 CreateCell(corner, cs, color);

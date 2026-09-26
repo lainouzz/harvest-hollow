@@ -3,25 +3,21 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Drives the main menu buttons and swaps between the main panel and the settings panel.
 public class MainMenuController : MonoBehaviour
 {
     [Header("Scene")]
     [SerializeField] private string gameSceneName = "SampleScene";
 
     [Header("Panels")]
-    [SerializeField] private GameObject mainMenuRoot;   // "MainMenu" object (the 4 buttons)
-    [SerializeField] private GameObject settingsRoot;   // "Settings" object
+    [SerializeField] private GameObject mainMenuRoot;
+    [SerializeField] private GameObject settingsRoot;
 
     [Header("Continue")]
-    [SerializeField] private Button continueButton;     // greyed out until a save exists
+    [SerializeField] private Button continueButton;
 
     [Header("Fade")]
-    [SerializeField] private CanvasGroup fadeGroup;     // full-screen black overlay
+    [SerializeField] private CanvasGroup fadeGroup;
     [SerializeField] private float fadeDuration = 1f;
-
-    // Set this key when you add saving; Continue enables itself when it exists.
-    private const string SaveKey = "HasSave";
 
     private bool loading;
 
@@ -33,7 +29,7 @@ public class MainMenuController : MonoBehaviour
         ShowMain();
 
         if (continueButton != null)
-            continueButton.interactable = PlayerPrefs.HasKey(SaveKey);
+            continueButton.interactable = SaveSystem.HasSave;
 
         if (fadeGroup != null)
         {
@@ -42,14 +38,17 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    // The game scene loads the save by itself whenever one exists, so a new game
+    // just deletes it first. Note: this wipes the old farm immediately.
     public void StartNewGame()
     {
-        // A real "new game" would clear the save here first.
+        SaveSystem.Delete();
         LoadGame();
     }
 
     public void Continue()
     {
+        if (!SaveSystem.HasSave) return;
         LoadGame();
     }
 

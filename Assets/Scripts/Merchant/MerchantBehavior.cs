@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-// Drives the merchant between the farm and an off-map point, waiting at each end.
 public class MerchantBehavior : MonoBehaviour
 {
     [SerializeField] private float driveSpeed = 5f;
@@ -25,11 +24,9 @@ public class MerchantBehavior : MonoBehaviour
 
     public enum State { AtFarm, Leaving, Away, Arriving }
 
-    // Fired whenever the truck changes state so effects can react (see MerchantSFX/MerchantVFX).
     public event Action<State> OnStateChanged;
     public State CurrentState { get; private set; }
 
-    // True while the truck is actually moving.
     public bool IsDriving => CurrentState == State.Leaving || CurrentState == State.Arriving;
 
     private float timer;
@@ -71,7 +68,6 @@ public class MerchantBehavior : MonoBehaviour
         return timer <= 0f;
     }
 
-    // Moves toward target at a constant speed; returns true once it arrives.
     private bool DriveTo(Vector3 target)
     {
         transform.position = Vector3.MoveTowards(transform.position, target, driveSpeed * Time.deltaTime);

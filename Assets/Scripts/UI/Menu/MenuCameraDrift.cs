@@ -1,12 +1,10 @@
 using UnityEngine;
 
-// Slowly orbits (and gently bobs) the menu camera around the farm so the backdrop
-// feels alive instead of being a frozen shot.
 public class MenuCameraDrift : MonoBehaviour
 {
-    [SerializeField] private Transform pivot;          // point to orbit around (farm center)
-    [SerializeField] private float orbitSpeed = 3f;    // degrees per second
-    [SerializeField] private float bobAmount = 0.25f;  // vertical sway height
+    [SerializeField] private Transform pivot;
+    [SerializeField] private float orbitSpeed = 3f;
+    [SerializeField] private float bobAmount = 0.25f;
     [SerializeField] private float bobSpeed = 0.5f;
 
     private float startY;

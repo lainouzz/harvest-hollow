@@ -28,7 +28,6 @@ public class InventoryToggle : MonoBehaviour
             SetOpen(!inventoryPanel.activeSelf);
     }
 
-    // Public so the Exit button can hook Close().
     public void Open() => SetOpen(true);
     public void Close() => SetOpen(false);
 

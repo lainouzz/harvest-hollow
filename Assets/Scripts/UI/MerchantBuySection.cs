@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Rarity tier — decides how likely a crop is to be in stock when the merchant arrives.
 public enum CropTier { Starter, Common, Premium }
 
 [Serializable]
@@ -12,9 +11,6 @@ public class BuyableCrop
     public CropTier tier = CropTier.Common;
 }
 
-// The Buy list. Each arrival, it rolls which crops are in stock by tier (starter/
-// common almost always, premium sometimes). Buying spends coins and deposits the
-// items into the inventory. Put this on the BuySection object.
 public class MerchantBuySection : MerchantSection
 {
     [Header("Catalog")]
@@ -43,7 +39,6 @@ public class MerchantBuySection : MerchantSection
         base.OnEnable();
     }
 
-    // Force a fresh roll — call this from a real "merchant arrives" event later.
     public void Restock()
     {
         RollStock();

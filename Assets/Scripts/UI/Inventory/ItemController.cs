@@ -3,7 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// The view for one inventory row (on the "Item" prefab).
 public class ItemController : MonoBehaviour
 {
     [SerializeField] private TMP_Text nameText;

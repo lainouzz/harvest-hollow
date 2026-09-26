@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Plays a "use" sound for the currently held tool on left-click. Assign clips per
-// tool below; a random one plays with slight pitch/volume variation.
 public class ToolSoundPlayer : MonoBehaviour
 {
     [System.Serializable]
@@ -14,7 +12,7 @@ public class ToolSoundPlayer : MonoBehaviour
     }
 
     [SerializeField] private ItemSwitcher itemSwitcher;
-    [SerializeField] private PlayerLook player;     // to skip playing while in a UI
+    [SerializeField] private PlayerLook player;
     [SerializeField] private AudioSource source;
     [SerializeField] private bool playOnAttack = true;
     [SerializeField] private List<ToolSound> toolSounds = new();
@@ -36,14 +34,13 @@ public class ToolSoundPlayer : MonoBehaviour
     private void Update()
     {
         if (!playOnAttack) return;
-        if (Time.timeScale == 0f) return;   // game is paused
+        if (Time.timeScale == 0f) return;
 
         bool inUI = player != null && player.isInShopUI;
         if (input.Player.Attack.WasPressedThisFrame() && !inUI)
             PlayCurrentToolSound();
     }
 
-    // Public so it can also be called on a successful action instead of every click.
     public void PlayCurrentToolSound()
     {
         if (itemSwitcher == null || source == null) return;

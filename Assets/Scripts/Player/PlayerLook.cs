@@ -37,7 +37,6 @@ public class PlayerLook : MonoBehaviour
         isInShopUI = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
         Vector2 lookRotation = inputActions.Player.Look.ReadValue<Vector2>();

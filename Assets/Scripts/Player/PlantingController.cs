@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Put this on the player. It aims a ray out of the camera (the crosshair, since
-// the cursor is locked), finds the grid cell being looked at, and acts on it
-// based on the item currently held (see ItemSwitcher).
 public class PlantingController : MonoBehaviour
 {
     [SerializeField] private Camera playerCamera;
@@ -26,7 +23,7 @@ public class PlantingController : MonoBehaviour
     [SerializeField] private CropData selectedCrop;
     [Tooltip("Set by clicking an inventory item at runtime.")]
     [SerializeField] private CropData selectedSeed;
-    private InventoryItem selectedSeedItem;   // the inventory stack the seed comes from
+    private InventoryItem selectedSeedItem;
     private InventoryManager inventory;
     private PlayerLook playerLook;
 
@@ -75,7 +72,6 @@ public class PlantingController : MonoBehaviour
             inventory.OnItemSelected -= OnInventoryItemSelected;
     }
 
-    // Clicking an inventory item picks the crop it plants as the current seed.
     private void OnInventoryItemSelected(InventoryItem item)
     {
         if (item == null || item.crop == null) return;
@@ -117,12 +113,10 @@ public class PlantingController : MonoBehaviour
 
     private bool IsBlocked()
     {
-        if (Time.timeScale == 0f) return true;                  // paused
-        return playerLook != null && playerLook.isInShopUI;     // inventory or shop open
+        if (Time.timeScale == 0f) return true;
+        return playerLook != null && playerLook.isInShopUI;
     }
 
-    // What a left-click does depends on what you're holding. VFX only fires when the
-    // action actually succeeds (the grid Try* methods return false on a no-op).
     private void HandleLeftClick(ItemsInHand item)
     {
         Vector3 pos = grid.GridToWorld(aimedCell);
@@ -194,8 +188,6 @@ public class PlantingController : MonoBehaviour
         return grid.TryPlant(aimedCell, selectedCrop);
     }
 
-    // Plants the selected seed and consumes one from the inventory — but only if
-    // the plant actually happened. No seed in stock = can't plant.
     private bool TryPlantSelectedSeed()
     {
         if (!HasSeedInStock())
@@ -237,7 +229,6 @@ public class PlantingController : MonoBehaviour
             r.material.color = CanActHere(size) ? validColor : invalidColor;
     }
 
-    // Green only when the item you're holding can actually act on this cell.
     private bool CanActHere(Vector2Int size)
     {
         switch (currentItem)
@@ -259,9 +250,6 @@ public class PlantingController : MonoBehaviour
             default:
                 return false;
         }
-
-        // TODO: this only checks the anchor cell, so a multi-cell crop (size > 1x1)
-        //       can show green when part of its footprint isn't valid.
     }
 
     public void SetSelectedCrop(CropData crop) => selectedCrop = crop;

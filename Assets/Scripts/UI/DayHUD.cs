@@ -1,7 +1,6 @@
 using UnityEngine;
 using TMPro;
 
-// Shows the current day in the HUD; updates when the day advances.
 public class DayHUD : MonoBehaviour
 {
     [SerializeField] private TMP_Text dayText;
@@ -16,17 +15,19 @@ public class DayHUD : MonoBehaviour
     private void OnEnable()
     {
         DayManager.OnDayChanged += UpdateDisplay;
+        DayManager.OnDayLoaded += UpdateDisplay;
         ShowCurrentDay();
     }
 
     private void OnDisable()
     {
         DayManager.OnDayChanged -= UpdateDisplay;
+        DayManager.OnDayLoaded -= UpdateDisplay;
     }
 
     private void Start()
     {
-        ShowCurrentDay();   // in case the manager wasn't ready in OnEnable
+        ShowCurrentDay();
     }
 
     private void ShowCurrentDay()

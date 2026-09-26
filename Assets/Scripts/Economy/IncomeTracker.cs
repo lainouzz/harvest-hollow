@@ -1,8 +1,6 @@
 using UnityEngine;
 using TMPro;
 
-// Debug/tuning readout: gold earned and spent per day, plus a rough gold-per-crop-
-// per-day figure ("p") to size expansion pricing. Remove once the economy is tuned.
 public class IncomeTracker : MonoBehaviour
 {
     [Tooltip("Optional on-screen text. Empty = log to the Console.")]
@@ -52,9 +50,6 @@ public class IncomeTracker : MonoBehaviour
 
     private void OnDayChanged(int day)
     {
-        /*TODO: 
-         Create a end of day/next time UI if all profit, total spent and display day and time*/
-
         daysMeasured++;
         totalEarned += earnedToday;
         totalSpent += spentToday;

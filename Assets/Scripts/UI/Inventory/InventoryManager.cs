@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
-using static UnityEditor.Progress;
 
-// Holds the player's items as stacks (item + count) and rebuilds the UI list on change.
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
@@ -82,6 +80,15 @@ public class InventoryManager : MonoBehaviour
         Changed();
     }
 
+    public void LoadStacks(IEnumerable<Stack> loaded)
+    {
+        stacks.Clear();
+        foreach (Stack s in loaded)
+            if (s.item != null && s.count > 0) stacks.Add(s);
+
+        Changed();
+    }
+
     public int CountOf(InventoryItem item)
     {
         Stack stack = GetStack(item);
@@ -127,8 +134,7 @@ public class InventoryManager : MonoBehaviour
 
             if (obj.TryGetComponent(out ItemController row))
             {
-
-                Stack captured = stack;   // capture for the button callbacks
+                Stack captured = stack;
                 row.Setup(
                     captured.item,
                     captured.count,

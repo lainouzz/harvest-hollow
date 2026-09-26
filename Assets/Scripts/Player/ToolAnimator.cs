@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Plays the "use" animation of the held tool and blocks switching while it plays.
 public class ToolAnimator : MonoBehaviour
 {
     [SerializeField] private ItemSwitcher itemSwitcher;
@@ -46,14 +45,12 @@ public class ToolAnimator : MonoBehaviour
             PlayUse();
     }
 
-    // Safe to call with nothing held (a tool without an Animator just does nothing).
     public void PlayUse()
     {
         if (currentAnimator == null) return;
 
         currentAnimator.SetTrigger(useTrigger);
 
-        // Block switching until the swing finishes, so it can't be cut off.
         if (itemSwitcher != null)
             itemSwitcher.LockSwitching(useDuration);
     }

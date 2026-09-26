@@ -1,19 +1,27 @@
-using System;
 using UnityEngine;
-
 
 [RequireComponent(typeof(FarmGrid))]
 public class FenceBuilder : MonoBehaviour
 {
     [SerializeField] private GameObject fenceSegmentPrefab;
-    [SerializeField] private int entranceStart = 0;
 
     private FarmGrid grid;
     private Transform root;
 
     private void Awake() => grid = GetComponent<FarmGrid>();
-    private void OnEnable() => grid.OnGridChanged += Rebuild;
-    private void OnDisable() => grid.OnGridChanged -= Rebuild;
+
+    private void OnEnable()
+    {
+        grid.OnGridChanged += Rebuild;
+        grid.OnFenceChanged += Rebuild;
+    }
+
+    private void OnDisable()
+    {
+        grid.OnGridChanged -= Rebuild;
+        grid.OnFenceChanged -= Rebuild;
+    }
+
     private void Start() => Rebuild();
 
     private void Rebuild()
@@ -30,15 +38,13 @@ public class FenceBuilder : MonoBehaviour
             for (int z = 0; z < grid.Height; ++z)
             {
                 Vector2Int cell = new Vector2Int(x, z);
-
                 if (!grid.IsUnlocked(cell)) continue;
 
-                bool isEntrance = (z == entranceStart);
-
-                if (!grid.IsUnlocked(cell + Vector2Int.right)) { SpawnFence(cell, Vector2Int.right); }
-                if (!grid.IsUnlocked(cell + Vector2Int.left) && !isEntrance) { SpawnFence(cell, Vector2Int.left); }
-                if (!grid.IsUnlocked(cell + Vector2Int.up)) { SpawnFence(cell, Vector2Int.up); }
-                if (!grid.IsUnlocked(cell + Vector2Int.down)) { SpawnFence(cell, Vector2Int.down); }
+                foreach (Vector2Int dir in FarmGrid.FenceSides)
+                {
+                    if (!grid.IsUnlocked(cell + dir) && !grid.IsFenceOpen(cell, dir))
+                        SpawnFence(cell, dir);
+                }
             }
         }
     }

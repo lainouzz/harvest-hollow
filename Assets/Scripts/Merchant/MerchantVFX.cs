@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// Plays looping exhaust/dust particles while the truck drives and stops them when it
-// parks. Put this on the truck; assign particle systems that live on the truck model.
 [RequireComponent(typeof(MerchantBehavior))]
 public class MerchantVFX : MonoBehaviour
 {

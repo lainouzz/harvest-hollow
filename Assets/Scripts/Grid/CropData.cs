@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// One asset per crop type (Carrot, Wheat, ...). Create via
-// Assets > Create > Farm > Crop Data, then drop it on the PlantingController.
 [CreateAssetMenu(fileName = "Crop", menuName = "Farm/Crop Data")]
 public class CropData : ScriptableObject
 {
@@ -16,9 +14,6 @@ public class CropData : ScriptableObject
     [Tooltip("Footprint on the grid, in cells.")]
     public Vector2Int size = Vector2Int.one;
 
-    // TODO: neither of these is read by anything yet — no money system exists.
-    //       seedCost should be charged on plant, sellValue paid on sell (which,
-    //       per the plan, happens when you sell to a person, not on the grid).
     [Header("Economy")]
     public int seedCost = 1;
     public int sellValue = 3;
@@ -40,7 +35,4 @@ public class CropData : ScriptableObject
 
     [Tooltip("Extra yield when planted on watered soil.")]
     public int wateredYieldBonus = 1;
-
-    // Growth stage visuals live on the crop prefab's Crop component (`stages`),
-    // since they're child models, not data.
 }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// The Sell list: built from what the player owns. Selling removes items and pays out.
 public class MerchantSellSection : MerchantSection
 {
     [Header("Sell pricing")]
@@ -13,7 +12,6 @@ public class MerchantSellSection : MerchantSection
     {
         base.OnEnable();
 
-        // Keep the list in sync if the inventory changes while Sell is open.
         if (inventory != null) inventory.OnChanged += BuildRows;
     }
 
@@ -58,7 +56,7 @@ public class MerchantSellSection : MerchantSection
             if (row != null && row.Quantity > 0)
                 sales.Add((row.Item, row.Quantity, row.LineTotal));
 
-        inventory.OnChanged -= BuildRows;   // don't rebuild once per removal
+        inventory.OnChanged -= BuildRows;
         foreach (var sale in sales)
         {
             inventory.Remove(sale.item, sale.qty);

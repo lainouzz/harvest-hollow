@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Highlights the hotbar slot for the currently held item. Put this on the "Slots"
-// object (the one with the Grid Layout Group) — it uses each slot's background
-// Image. Slot order must match the ItemsInHand enum / ItemSwitcher item order.
 public class HotbarHUD : MonoBehaviour
 {
     private enum HighlightStyle { Color, Sprite }
@@ -28,7 +25,6 @@ public class HotbarHUD : MonoBehaviour
     [Tooltip("Sprite shown on the selected slot. Unselected slots keep their normal sprite.")]
     [SerializeField] private Sprite highlightedSprite;
 
-    // Captured at startup so unselected slots can be restored exactly.
     private Color[] normalColors;
     private Sprite[] normalSprites;
 
@@ -80,7 +76,7 @@ public class HotbarHUD : MonoBehaviour
                 slot.color = selected ? normalColors[i] * new Color(highlightDarken, highlightDarken, highlightDarken, 1f)
                                       : normalColors[i];
             }
-            else // Sprite
+            else
             {
                 slot.sprite = selected && highlightedSprite != null ? highlightedSprite : normalSprites[i];
             }

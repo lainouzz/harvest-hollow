@@ -7,6 +7,10 @@ public class DayManager : MonoBehaviour
     public static DayManager Instance { get; private set; }
     public static event Action<int> OnDayChanged;
 
+    // Fired when a saved day is restored. Separate from OnDayChanged on purpose:
+    // loading must update the HUD without making every crop grow another day.
+    public static event Action<int> OnDayLoaded;
+
     [SerializeField] private int currentDay = 1;
     [Tooltip("Seconds the player must stay in the sleep zone before the day advances.")]
     [SerializeField] private float daySwitchTimer = 1.5f;
@@ -48,10 +52,9 @@ public class DayManager : MonoBehaviour
 
         if (transition != null) yield return transition.FadeOut();
 
-        AdvanceDay();   // crops grow while the screen is black
+        AdvanceDay();
 
-        // TODO: autosave here — the new day, wallet, inventory and grid are all settled
-        //       at this point. Call your save system once it exists (see SaveManager).
+        if (SaveManager.Instance != null) SaveManager.Instance.Save();
 
         if (transition != null)
         {
@@ -70,6 +73,12 @@ public class DayManager : MonoBehaviour
         OnDayChanged?.Invoke(currentDay);
     }
 
+    public void SetDay(int day)
+    {
+        currentDay = Mathf.Max(1, day);
+        OnDayLoaded?.Invoke(currentDay);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (isSwitching) return;
@@ -83,7 +92,6 @@ public class DayManager : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // Walking out of the zone cancels a pending switch.
         if (other.CompareTag("Player"))
             isInTrigger = false;
     }

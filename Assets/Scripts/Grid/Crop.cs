@@ -1,11 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-// Attach to a crop prefab. Grows in whole days (advanced by the DayManager) and
-// swaps between stage models as it grows — no per-frame work.
-//
-// Put each stage as a CHILD of the prefab and drag them into `stages` in order:
-//   sprout -> ... -> ripe (the LAST stage is the harvest-ready look).
 public class Crop : MonoBehaviour
 {
     [Tooltip("Stage models in order, last = ripe/harvest-ready. Leave empty to " +
@@ -16,8 +11,8 @@ public class Crop : MonoBehaviour
     [SerializeField] private UnityEvent onGrown = new UnityEvent();
 
     private CropData data;
-    private float grownDays;             // growth accumulated so far, in days
-    private float growthPerDay = 1f;     // > 1 grows faster (watered soil)
+    private float grownDays;
+    private float growthPerDay = 1f;
     private int bonusYield;
     private int shownStage = -1;
 
@@ -25,16 +20,16 @@ public class Crop : MonoBehaviour
     public CropData Data => data;
     public UnityEvent  OnGrown => onGrown;
 
-    // Which cell this crop is planted on (handy for UI / lookups).
     public Vector2Int GridPosition { get; private set; }
 
-    // 0 = just planted, 1 = fully grown. Read this for a progress bar.
     public float Progress { get; private set; }
 
-    // What you get on harvest (base yield + any watered bonus).
     public int Yield => (data != null ? data.baseYield : 0) + bonusYield;
 
-    // growthMultiplier > 1 grows faster; bonusYield is added to the harvest.
+    public float GrownDays => grownDays;
+    public float GrowthPerDay => growthPerDay;
+    public int BonusYield => bonusYield;
+
     public void Initialize(CropData cropData, Vector2Int cell, float growthMultiplier = 1f, int bonusYield = 0)
     {
         data = cropData;
@@ -49,11 +44,22 @@ public class Crop : MonoBehaviour
         ApplyGrowth(0f);
     }
 
+    // Jumps straight to a saved amount of growth (call after Initialize). Doesn't fire
+    // OnGrown — the grid refreshes the tile icon itself after loading.
+    public void RestoreGrowth(float savedGrownDays)
+    {
+        if (data == null) return;
+
+        grownDays = Mathf.Max(0f, savedGrownDays);
+        float target = data.daysToGrow > 0 ? data.daysToGrow : 1;
+        Progress = Mathf.Clamp01(grownDays / target);
+        IsGrown = Progress >= 1f;
+        ApplyGrowth(Progress);
+    }
+
     private void OnEnable() => DayManager.OnDayChanged += OnDayChanged;
     private void OnDisable() => DayManager.OnDayChanged -= OnDayChanged;
 
-    // Each day advances growth by growthPerDay (watered soil counts as more).
-    // TODO: real watering — only apply the watered bonus on days it was watered.
     private void OnDayChanged(int day)
     {
         if (data == null || IsGrown) return;
@@ -71,12 +77,10 @@ public class Crop : MonoBehaviour
         }
     }
 
-    // t: 0 = just planted, 1 = fully grown.
     private void ApplyGrowth(float t)
     {
         if (stages == null || stages.Length == 0)
         {
-            // Placeholder while a crop has no stage models assigned.
             transform.localScale = Vector3.one * Mathf.Lerp(0.2f, 1f, t);
             return;
         }
@@ -84,14 +88,13 @@ public class Crop : MonoBehaviour
         ShowStage(StageForProgress(t));
     }
 
-    // Ripe (last) stage at full growth; the earlier stages spread across [0,1).
     private int StageForProgress(float t)
     {
         int lastStage = stages.Length - 1;
         if (t >= 1f || IsGrown) return lastStage;
         if (stages.Length == 1) return 0;
 
-        int growingStages = stages.Length - 1;   // all but the ripe one
+        int growingStages = stages.Length - 1;
         return Mathf.Clamp(Mathf.FloorToInt(t * growingStages), 0, growingStages - 1);
     }
 

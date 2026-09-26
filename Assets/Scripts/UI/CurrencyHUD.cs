@@ -1,7 +1,6 @@
 using UnityEngine;
 using TMPro;
 
-// Shows the player's money in the HUD; updates when the Wallet changes.
 public class CurrencyHUD : MonoBehaviour
 {
     [SerializeField] private Wallet wallet;

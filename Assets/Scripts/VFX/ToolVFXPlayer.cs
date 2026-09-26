@@ -23,7 +23,6 @@ public class ToolVFXPlayer : MonoBehaviour
         ParticleSystem fx = Instantiate(entry.prefab, worldPos + Vector3.up * entry.yOffset, Quaternion.Euler(-90, 0, 0));
         fx.Play();
 
-        // Clean up once the burst has finished so instances don't pile up.
         ParticleSystem.MainModule main = fx.main;
         Destroy(fx.gameObject, main.duration + main.startLifetime.constantMax);
     }

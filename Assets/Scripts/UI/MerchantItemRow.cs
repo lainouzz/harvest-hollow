@@ -4,7 +4,6 @@ using UnityEngine.Serialization;
 using UnityEngine.UI;
 using TMPro;
 
-// One row in a merchant list. Works for both Buy and Sell — the section sets price and max.
 public class MerchantItemRow : MonoBehaviour
 {
     [SerializeField] private Image icon;

@@ -108,14 +108,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleFootsteps()
     {
-        // Only step when actually moving along the ground (not into a wall / mid-air).
         Vector3 horizontal = controller.velocity;
         horizontal.y = 0f;
         bool walking = isGrounded && horizontal.magnitude > 0.1f;
 
         if (!walking)
         {
-            stepTimer = 0f;   // next step fires instantly when you start moving again
+            stepTimer = 0f;
             return;
         }
 
@@ -133,12 +132,11 @@ public class PlayerMovement : MonoBehaviour
 
         int index = Random.Range(0, audioClips.Count);
 
-        // Avoid playing the same clip twice in a row so it sounds varied.
         if (audioClips.Count > 1 && index == lastStepIndex)
             index = (index + 1) % audioClips.Count;
         lastStepIndex = index;
 
-        footstepSource.pitch = Random.Range(0.9f, 1.1f);   // tiny variation per step
+        footstepSource.pitch = Random.Range(0.9f, 1.1f);
         footstepSource.PlayOneShot(audioClips[index]);
     }
 }

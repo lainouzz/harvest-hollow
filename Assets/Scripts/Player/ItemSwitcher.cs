@@ -20,7 +20,6 @@ public class ItemSwitcher : MonoBehaviour
 
     public ItemsInHand Current => (ItemsInHand)currentIndex;
 
-    // The active tool GameObject (the one currently shown in-hand), or null.
     public GameObject CurrentItemObject =>
         (items != null && currentIndex >= 0 && currentIndex < items.Length)
             ? items[currentIndex]
@@ -30,7 +29,6 @@ public class ItemSwitcher : MonoBehaviour
 
     private GameInput inputActions;
 
-    // While Time.time is before this, switching is blocked (e.g. mid tool-swing).
     private float switchUnlockTime;
 
     public bool CanSwitch => Time.time >= switchUnlockTime;
@@ -55,11 +53,8 @@ public class ItemSwitcher : MonoBehaviour
         Equip(currentIndex);
     }
 
-    // TODO: add number-key hotbar bindings (1/2/3/4 -> Equip(0..3)) and/or scroll
-    //       wheel. Cycling is fine for 4 items, worse once there are more.
     private void Update()
     {
-        // Can't switch mid-animation, so the tool anim never gets cut off / stuck.
         if (!CanSwitch) return;
 
         if (inputActions.Player.Hotbar1.WasPressedThisFrame())
@@ -86,7 +81,7 @@ public class ItemSwitcher : MonoBehaviour
         if (index >= items.Length)
             return;
 
-        Equip(index);//
+        Equip(index);
     }
 
     public void Equip(int index)
