@@ -134,8 +134,10 @@ public class PlantingController : MonoBehaviour
 
             case ItemsInHand.WaterCan:
                 if (grid.TryWater(aimedCell))
+                {
                     PlayVFX(ToolVFXPlayer.ToolVFX.Water, pos);
-                    wateringCanVFX.Play();
+                    if (wateringCanVFX != null && VfxSettings.Enabled) wateringCanVFX.Play();
+                }            
                 break;
 
             case ItemsInHand.Seeds:

@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 7
   itemName: Eggplant
   value: 56
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: 3cb515da31c294744a1d3a20ef728cd0, type: 3}
   crop: {fileID: 11400000, guid: 0ef071524ad16354f9ae13ab57b18de9, type: 2}

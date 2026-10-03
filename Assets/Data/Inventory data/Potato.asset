@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 1
   itemName: Potato
   value: 10
-  icon: {fileID: 21300000, guid: 73e2a05c61e022847b8c16bbb41024e7, type: 3}
+  icon: {fileID: 21300000, guid: 1eb9872d5e10395459f517936a01d80f, type: 3}
   crop: {fileID: 11400000, guid: 92011357332e69044bec9043a8bbb986, type: 2}

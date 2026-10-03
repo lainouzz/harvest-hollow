@@ -16,10 +16,8 @@ MonoBehaviour:
   prefab: {fileID: 3394348395526295297, guid: 7df9ed359a408724aabb29e588a10270, type: 3}
   icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
   size: {x: 1, y: 1}
-  seedCost: 44
-  sellValue: 7
   daysToGrow: 5
-  baseYield: 5
+  baseYield: 3
   produce: {fileID: 11400000, guid: 5bd85b1fd4c711e4f8c6ef9fbef94064, type: 2}
   wateredGrowthMultiplier: 1.5
   wateredYieldBonus: 1

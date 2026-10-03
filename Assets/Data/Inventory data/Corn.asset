@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 9
   itemName: Corn
   value: 50
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: 3c1f273b9394a3740a268d112e716ef7, type: 3}
   crop: {fileID: 11400000, guid: 7774a68264c4108438b2a2257e8b676f, type: 2}

@@ -25,6 +25,10 @@ public class FarmGrid : MonoBehaviour
         new FenceOpening { cell = Vector2Int.zero, side = FenceSide.Left }
     };
 
+    [Header("Watering")]
+    [Tooltip("Nights watered soil stays wet before drying back to tilled. 1 = dry by the next morning.")]
+    [SerializeField, Min(1)] private int daysSoilStaysWet = 2;
+
     private GridCellData[,] cells;
 
     // Each open fence side is stored once, as the right or top edge of a cell, so
@@ -56,6 +60,9 @@ public class FarmGrid : MonoBehaviour
     {
         InitGrid();
     }
+
+    private void OnEnable() => DayManager.OnDayChanged += DrySoil;
+    private void OnDisable() => DayManager.OnDayChanged -= DrySoil;
 
     private void InitGrid()
     {
@@ -185,7 +192,7 @@ public class FarmGrid : MonoBehaviour
         RefreshStatus(cell);
 
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
-        if (wallet != null) wallet.Add(10);
+        //if (wallet != null) wallet.Add(10);
 
         return true;
     }
@@ -229,7 +236,26 @@ public class FarmGrid : MonoBehaviour
         if (data.state != TileState.Tilled) return false;
 
         SetCellState(cell, data, TileState.Watered);
+        data.wetDaysLeft = daysSoilStaysWet;
         return true;
+    }
+
+    // Crops already planted keep the bonus they got at planting; drying only
+    // affects whether the next seed planted here gets it.
+    private void DrySoil(int day)
+    {
+        for (int x = 0; x < gridWidth; ++x)
+        {
+            for (int z = 0; z < gridHeight; ++z)
+            {
+                GridCellData data = cells[x, z];
+                if (data.state != TileState.Watered) continue;
+
+                data.wetDaysLeft--;
+                if (data.wetDaysLeft <= 0)
+                    SetCellState(new Vector2Int(x, z), data, TileState.Tilled);
+            }
+        }
     }
 
     private void SetCellState(Vector2Int cell, GridCellData data, TileState state)
@@ -437,6 +463,7 @@ public class FarmGrid : MonoBehaviour
                     cells[cell.x, cell.y].isOccupied = false;
                     cells[cell.x, cell.y].id = null;
                     cells[cell.x, cell.y].state = TileState.Untilled;
+                    cells[cell.x, cell.y].wetDaysLeft = 0;
                 }
             }
         }
@@ -483,7 +510,7 @@ public class FarmGrid : MonoBehaviour
                     save.unlockedCells.Add(new CellSave { x = x, z = z });
 
                 if (c.isOccupied && c.state != TileState.Untilled)
-                    save.tileStates.Add(new StateSave { x = x, z = z, state = (int)c.state });
+                    save.tileStates.Add(new StateSave { x = x, z = z, state = (int)c.state, wetDaysLeft = c.wetDaysLeft });
 
                 if (c.crop != null && c.crop.Data != null)
                 {
@@ -538,6 +565,7 @@ public class FarmGrid : MonoBehaviour
             if (!IsInsideGrid(cell) || !cells[s.x, s.z].isOccupied) continue;
 
             SetCellState(cell, cells[s.x, s.z], (TileState)s.state);
+            cells[s.x, s.z].wetDaysLeft = s.wetDaysLeft;
         }
 
         foreach (CropSave c in save.crops)
@@ -569,6 +597,7 @@ public class FarmGrid : MonoBehaviour
             c.isOccupied = false;
             c.id = null;
             c.state = TileState.Untilled;
+            c.wetDaysLeft = 0;
             c.crop = null;
         }
     }
@@ -625,6 +654,7 @@ public class GridCellData
     public bool isOccupied;
     public string id;
     public TileState state = TileState.Untilled;
+    public int wetDaysLeft;
     public Crop crop;
 }
 

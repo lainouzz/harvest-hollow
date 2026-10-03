@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 4
   itemName: Onion
   value: 30
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: 68b6cc0cc77971347997408e33c49892, type: 3}
   crop: {fileID: 11400000, guid: 14efd516a499f5a408ae6e4080a09d02, type: 2}

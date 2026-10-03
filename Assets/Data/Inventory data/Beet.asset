@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 13
   itemName: Beet
   value: 24
-  icon: {fileID: 21300000, guid: 60a5f1103ab07b24182aa8cd6ef0d02f, type: 3}
+  icon: {fileID: 21300000, guid: 38eedbf011f4ad746a43ed19e827d4f5, type: 3}
   crop: {fileID: 11400000, guid: 99ec1e13d84b76b4399e251a9c60fd19, type: 2}

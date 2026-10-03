@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 8
   itemName: Cucumber
   value: 24
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: eada5e1ebd8baf147a93f5e3d2af7363, type: 3}
   crop: {fileID: 11400000, guid: 64af53eddd9bb4f48b73cc3896020197, type: 2}

@@ -48,6 +48,7 @@ public class StateSave
 {
     public int x, z;
     public int state;
+    public int wetDaysLeft;
 }
 
 [Serializable]

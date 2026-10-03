@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
@@ -23,15 +22,11 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField] private TMP_Dropdown resolutionDropdown;
     [SerializeField] private Toggle vfxToggle;
 
-    [Tooltip("Hook post-processing / particles on/off here.")]
-    [SerializeField] private UnityEvent<bool> onVfxChanged;
-
     private const string MasterKey = "vol_master";
     private const string SfxKey = "vol_sfx";
     private const string MusicKey = "vol_music";
     private const string QualityKey = "quality";
     private const string ResKey = "resolution";
-    private const string VfxKey = "vfx";
 
     private readonly List<Resolution> resolutions = new();
 
@@ -81,11 +76,7 @@ public class SettingsMenu : MonoBehaviour
         PlayerPrefs.SetInt(ResKey, index);
     }
 
-    public void SetVfx(bool on)
-    {
-        onVfxChanged?.Invoke(on);
-        PlayerPrefs.SetInt(VfxKey, on ? 1 : 0);
-    }
+    public void SetVfx(bool on) => VfxSettings.Enabled = on;
 
     private void ApplyVolume(string param, string key, float value)
     {
@@ -149,11 +140,7 @@ public class SettingsMenu : MonoBehaviour
         }
 
         if (vfxToggle != null)
-        {
-            bool on = PlayerPrefs.GetInt(VfxKey, 1) == 1;
-            vfxToggle.SetIsOnWithoutNotify(on);
-            onVfxChanged?.Invoke(on);
-        }
+            vfxToggle.SetIsOnWithoutNotify(VfxSettings.Enabled);
     }
 
     private void LoadSlider(Slider slider, string key)

@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 3
   itemName: Tomato
   value: 60
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: 3a2a0c64504479d4390bec606c89c093, type: 3}
   crop: {fileID: 11400000, guid: c5ed9594217c5c744b07059f29739139, type: 2}

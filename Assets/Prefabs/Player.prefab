@@ -197,7 +197,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 930833505069084216}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -276,6 +276,8 @@ GameObject:
   - component: {fileID: 26608567068184367}
   - component: {fileID: 7996179672680979020}
   - component: {fileID: 193963327594349136}
+  - component: {fileID: 2875855405008199011}
+  - component: {fileID: 963223208557431141}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -291,7 +293,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3608858439817922025}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.70314455, z: -0, w: 0.711047}
+  m_LocalRotation: {x: 0, y: 0.7031465, z: 0, w: 0.71104497}
   m_LocalPosition: {x: -8.39, y: 1, z: -21.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -316,7 +318,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3608858439817922025}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -401,7 +403,7 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 2
-  m_Radius: 0.5
+  m_Radius: 0.35
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
@@ -463,7 +465,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94b0f75712370164eaf2fcfc52d45c6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  coins: 1000000
+  coins: 100
 --- !u!114 &3770308511592084805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -702,6 +704,74 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2875855405008199011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3608858439817922025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb0e9725b9f73e43a09925c34fd7a8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grid: {fileID: 0}
+  playerCamera: {fileID: 2458612108350299350}
+  playerLook: {fileID: 4608912828975199950}
+  toggleKey: 38
+  maxReach: 6
+  aimMask:
+    serializedVersion: 2
+    m_Bits: 256
+  edgeZone: 0.5
+--- !u!114 &963223208557431141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3608858439817922025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cb52339456216c4d8a38c29aac04e08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  panel: {fileID: 0}
+  label: {fileID: 0}
+  nextKey: 2
+  startDelay: 1.5
+  fadeTime: 0.4
+  gapBetweenHints: 0.4
+  hints:
+  - message: 'Welcome to Harvest Hollow!
+
+      WASD to move, mouse to look, Space
+      to jump.
+
+      (Enter: next tip)'
+    duration: 6
+  - message: Press 1-5 to switch what you're holding, and left-click to use it.
+    duration: 6
+  - message: With the hoe, click an empty plot to lay soil, then click it again to
+      till it.
+    duration: 6
+  - message: Water tilled soil before planting. Seeds in wet soil grow faster and
+      give more.
+    duration: 6
+  - message: Press Tab to open your inventory and click a seed to pick it, then plant
+      it with the seed bag.
+    duration: 6
+  - message: Harvest ripe crops with the harvest tool. Walk up to the merchant's
+      truck to sell them and buy seeds.
+    duration: 6
+  - message: Look at a plot with a price over it and press B to buy it.
+    duration: 6
+  - message: Press X on a fence to open a path through it.
+    duration: 6
+  - message: Walk into the sleep spot to end the day. Crops grow overnight and your
+      game is saved.
+    duration: 6
 --- !u!1 &5150240241856998831
 GameObject:
   m_ObjectHideFlags: 0
@@ -777,7 +847,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 119
+    m_Bits: 375
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

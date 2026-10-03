@@ -17,6 +17,8 @@ public class ToolVFXPlayer : MonoBehaviour
 
     public void Play(ToolVFX action, Vector3 worldPos)
     {
+        if (!VfxSettings.Enabled) return;
+
         VFXEntry entry = Find(action);
         if (entry == null || entry.prefab == null) return;
 

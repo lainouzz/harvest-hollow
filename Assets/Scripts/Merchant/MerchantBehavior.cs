@@ -33,7 +33,8 @@ public class MerchantBehavior : MonoBehaviour
 
     private void Start()
     {
-        if(merchantBuySection == null) merchantBuySection = FindAnyObjectByType<MerchantBuySection>();
+        if (merchantBuySection == null)
+            merchantBuySection = FindFirstObjectByType<MerchantBuySection>(FindObjectsInactive.Include);
 
         transform.position = startPos.position;
         if (carPrefab != null) carPrefab.SetActive(true);

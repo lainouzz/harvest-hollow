@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 5
   itemName: Grape
   value: 90
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: c9c09639855610d4eae1409a0ea678a7, type: 3}
   crop: {fileID: 11400000, guid: b0825c427b3519b4ca8b9ee81f50b7e0, type: 2}

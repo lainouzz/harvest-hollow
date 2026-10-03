@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 11
   itemName: Cabbage
   value: 36
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: 4fa58d72d02388543a801bc97e00c0cf, type: 3}
   crop: {fileID: 11400000, guid: 460f2199144d73047b238d7d1e40fa31, type: 2}

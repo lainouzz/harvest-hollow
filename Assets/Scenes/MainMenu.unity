@@ -17513,6 +17513,50 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2025499126914452814, guid: 93b190f5b89756f4f9d6cde044ae3b05, type: 3}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 2013849694298121696, guid: 7d9e938b60ba9b646aec30ac5fec616e, type: 3}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 356026780973587387, guid: eb786dd348e36b94fab19bd790a1ada3, type: 3}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[3].m_Target
+      value: 
+      objectReference: {fileID: 4624858337856078095, guid: 31e5bc0f89bb3bd4c9ae065d823db12a, type: 3}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[4].m_Target
+      value: 
+      objectReference: {fileID: 4624858337856078095, guid: 31e5bc0f89bb3bd4c9ae065d823db12a, type: 3}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[2].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[3].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6618976301928308987, guid: a91dca78df2952341b97296338393465, type: 3}
+      propertyPath: onVfxChanged.m_PersistentCalls.m_Calls.Array.data[4].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7478200409759489863, guid: a91dca78df2952341b97296338393465, type: 3}
       propertyPath: m_Name
       value: Settings

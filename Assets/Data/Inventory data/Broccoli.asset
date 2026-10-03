@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 12
   itemName: Broccoli
-  value: 8
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  value: 50
+  icon: {fileID: 21300000, guid: dc0aec4ef53e5064daf969842b5213c6, type: 3}
   crop: {fileID: 11400000, guid: 6b3f213da5d61c4488b91709401abb94, type: 2}

@@ -23,12 +23,17 @@ public class MerchantTabs : MonoBehaviour
         if (sellTab != null) sellTab.onClick.AddListener(ShowSell);
     }
 
+    private void OnEnable() => SetTab(showingBuy);
+
     public void ShowBuy() => SetTab(true);
     public void ShowSell() => SetTab(false);
 
     private void SetTab(bool buy)
     {
         showingBuy = buy;
+
+        if (buySection != null) buySection.SetActive(buy);
+        if (sellSection != null) sellSection.SetActive(!buy);
 
         Tint(buyTab, buy);
         Tint(sellTab, !buy);

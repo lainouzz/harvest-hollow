@@ -14,10 +14,6 @@ public class CropData : ScriptableObject
     [Tooltip("Footprint on the grid, in cells.")]
     public Vector2Int size = Vector2Int.one;
 
-    [Header("Economy")]
-    public int seedCost = 1;
-    public int sellValue = 3;
-
     [Header("Growth")]
     [Tooltip("How many days from planting to fully grown (on unwatered soil).")]
     public int daysToGrow = 3;

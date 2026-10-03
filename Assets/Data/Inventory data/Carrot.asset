@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 10
   itemName: Carrot
   value: 20
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: d226d7c9cce921342802974805960b1e, type: 3}
   crop: {fileID: 11400000, guid: 3e873d06c6bda0d47a31eff730766e7d, type: 2}

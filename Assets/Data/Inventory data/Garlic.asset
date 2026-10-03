@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 6
   itemName: Garlic
   value: 40
-  icon: {fileID: 21300000, guid: b16f466f80f1d7e48b2f3df323f30eb2, type: 3}
+  icon: {fileID: 21300000, guid: 17fc34e2a67d9dd48bf0da1ce4ac34f2, type: 3}
   crop: {fileID: 11400000, guid: 002c9f485d4647646aba4d47636c499a, type: 2}
