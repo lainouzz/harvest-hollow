@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 12
   itemName: Broccoli
   value: 50
-  icon: {fileID: 21300000, guid: dc0aec4ef53e5064daf969842b5213c6, type: 3}
+  icon: {fileID: 21300000, guid: 69e905858fa5746408717bd7bb9b0474, type: 3}
   crop: {fileID: 11400000, guid: 6b3f213da5d61c4488b91709401abb94, type: 2}

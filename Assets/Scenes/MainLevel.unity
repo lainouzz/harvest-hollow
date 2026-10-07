@@ -37947,7 +37947,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mode: 0
-  size: {x: 87.93541, y: 13.269307, z: 98.739395}
+  size: {x: 87.93542, y: 13.269308, z: 98.739395}
   overrideRendererFilters: 0
   minRendererVolumeSize: 0.1
   objectLayerMask:
@@ -37987,7 +37987,7 @@ Transform:
   m_GameObject: {fileID: 499193023}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.4031715, y: 4.2088284, z: 0.9230766}
+  m_LocalPosition: {x: 6.4031754, y: 4.208829, z: 0.9230766}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -190426,6 +190426,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 337892402604483004, guid: 9967d9a88a323af4da72068fdf07d074, type: 3}
+      propertyPath: coins
+      value: 150
+      objectReference: {fileID: 0}
     - target: {fileID: 743756731507567494, guid: 9967d9a88a323af4da72068fdf07d074, type: 3}
       propertyPath: m_LocalPosition.x
       value: -8.39
