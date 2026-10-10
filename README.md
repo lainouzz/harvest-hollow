@@ -4,7 +4,7 @@ A cozy, first-person farming game made solo in Unity. Till the soil, plant and w
 
 > **Play it on itch.io:** _link coming soon_
 
-![Screenshot](docs/Harvest Hollow Farm Logo.png)
+![Screenshot](docs/Harvest-Hollow-Farm-Logo.png)
 
 ---
 
