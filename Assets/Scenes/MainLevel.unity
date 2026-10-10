@@ -7048,7 +7048,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.4901041, y: 0.15737043}
   m_AnchorMax: {x: 0.4901041, y: 0.15737043}
-  m_AnchoredPosition: {x: -0.20000076, y: 2}
+  m_AnchoredPosition: {x: -0.19999695, y: 2}
   m_SizeDelta: {x: 1674.1, y: 269.31}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &85177645
@@ -126140,7 +126140,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -197.14331, y: 171}
+  m_AnchoredPosition: {x: -197.14355, y: 171}
   m_SizeDelta: {x: 394.28662, y: 269.31}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1610266354
@@ -190428,7 +190428,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 337892402604483004, guid: 9967d9a88a323af4da72068fdf07d074, type: 3}
       propertyPath: coins
-      value: 150
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 743756731507567494, guid: 9967d9a88a323af4da72068fdf07d074, type: 3}
       propertyPath: m_LocalPosition.x
@@ -190505,6 +190505,10 @@ PrefabInstance:
       propertyPath: inventoryPanel
       value: 
       objectReference: {fileID: 1990282775}
+    - target: {fileID: 7996179672680979020, guid: 9967d9a88a323af4da72068fdf07d074, type: 3}
+      propertyPath: 'toolSounds.Array.data[3].clips.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: bbb50641f2cf06d4b927378aae3815c8, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
