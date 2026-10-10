@@ -2,7 +2,7 @@
 
 A cozy, first-person farming game made solo in Unity. Till the soil, plant and water your crops, sell your harvest to a travelling merchant, and grow your farm one plot at a time.
 
-> **Play it on itch.io:** _link coming soon_
+> **Play it on itch.io:** https://lainouzz.itch.io/harvest-hollow
 
 ![Screenshot](docs/Harvest-Hollow-Farm-Logo.png)
 
