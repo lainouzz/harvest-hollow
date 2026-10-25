@@ -56,6 +56,8 @@ public class FarmGrid : MonoBehaviour
 
     public event Action OnFenceChanged;
 
+    public event Action<Vector2Int, InventoryItem, int> OnHarvested;
+
     private void Awake()
     {
         InitGrid();
@@ -181,15 +183,18 @@ public class FarmGrid : MonoBehaviour
         GridCellData data = cells[cell.x, cell.y];
         Crop crop = data.crop;
 
-        Debug.Log($"Harvested {crop.Data.cropName} x{crop.Yield}!");
+        InventoryItem produce = crop.Data.produce;
+        int amount = crop.Yield;
 
-        if (InventoryManager.Instance != null && crop.Data.produce != null)
-            InventoryManager.Instance.Add(crop.Data.produce, crop.Yield);
+        if (InventoryManager.Instance != null && produce != null)
+            InventoryManager.Instance.Add(produce, amount);
 
         plantedCrops.Remove(crop);
-        Destroy(crop.gameObject);
+        crop.PlayHarvested();
         data.crop = null;
         RefreshStatus(cell);
+
+        OnHarvested?.Invoke(cell, produce, amount);
 
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
         //if (wallet != null) wallet.Add(10);

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -25,6 +26,10 @@ public class Crop : MonoBehaviour
     public float Progress { get; private set; }
 
     public int Yield => (data != null ? data.baseYield : 0) + bonusYield;
+
+    // True if one more night of growth will finish this crop.
+    public bool WillRipenTonight =>
+        !IsGrown && data != null && grownDays + growthPerDay >= (data.daysToGrow > 0 ? data.daysToGrow : 1);
 
     public float GrownDays => grownDays;
     public float GrowthPerDay => growthPerDay;
@@ -55,6 +60,34 @@ public class Crop : MonoBehaviour
         Progress = Mathf.Clamp01(grownDays / target);
         IsGrown = Progress >= 1f;
         ApplyGrowth(Progress);
+    }
+
+    // Quick bounce up, then shrink to nothing, then destroy. Disabling the component
+    // stops it from growing further (coroutines keep running on a disabled script).
+    public void PlayHarvested(float duration = 0.2f)
+    {
+        enabled = false;
+        StartCoroutine(ShrinkAndDestroy(duration));
+    }
+
+    private IEnumerator ShrinkAndDestroy(float duration)
+    {
+        Vector3 startScale = transform.localScale;
+        float t = 0f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.Clamp01(t / duration);
+            float scale = k < 0.3f
+                ? Mathf.Lerp(1f, 1.15f, k / 0.3f)
+                : Mathf.Lerp(1.15f, 0f, (k - 0.3f) / 0.7f);
+
+            transform.localScale = startScale * scale;
+            yield return null;
+        }
+
+        Destroy(gameObject);
     }
 
     private void OnEnable() => DayManager.OnDayChanged += OnDayChanged;

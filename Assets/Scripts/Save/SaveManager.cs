@@ -71,7 +71,6 @@ public class SaveManager : MonoBehaviour
     {
         if (database == null || !SaveSystem.TryRead(out SaveData save)) return;
 
-        if (DayManager.Instance != null) DayManager.Instance.SetDay(save.day);
         if (wallet != null) wallet.SetCoins(save.coins);
         if (expansion != null) expansion.SlotsBought = save.slotsBought;
 
@@ -87,6 +86,9 @@ public class SaveManager : MonoBehaviour
         }
 
         if (grid != null) grid.RestoreState(save, database);
+
+        // Last, so anything that resets on "day loaded" (like DayStats) sees the restored coins.
+        if (DayManager.Instance != null) DayManager.Instance.SetDay(save.day);
 
         Debug.Log($"Game loaded (day {save.day}).");
     }

@@ -24,6 +24,7 @@ public class FarmExpansion : MonoBehaviour
     [SerializeField] private float maxReach = 6f;
 
     private int slotsBought;
+    private PlayerLook playerLook;
 
     public int NextSlotCost => baseSlotCost + slotsBought * costIncreasePerSlot;
 
@@ -38,10 +39,16 @@ public class FarmExpansion : MonoBehaviour
         if (grid == null) grid = GetComponent<FarmGrid>();
         if (playerCamera == null) playerCamera = Camera.main;
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
+        playerLook = FindAnyObjectByType<PlayerLook>();
     }
+
+    // Same rule as the other tools: no buying while paused or in a menu.
+    public bool CanBuyNow => Time.timeScale > 0f && (playerLook == null || !playerLook.isInShopUI);
 
     private void Update()
     {
+        if (!CanBuyNow) return;
+
         Keyboard keyboard = Keyboard.current;
         if (keyboard != null && keyboard.bKey.wasPressedThisFrame)
             TryBuyLookedAtSlot();
@@ -87,7 +94,7 @@ public class FarmExpansion : MonoBehaviour
         return TryBuySlot(cell);
     }
 
-    private bool TryGetLookedAtCell(out Vector2Int cell)
+    public bool TryGetLookedAtCell(out Vector2Int cell)
     {
         cell = default;
         if (playerCamera == null) return false;

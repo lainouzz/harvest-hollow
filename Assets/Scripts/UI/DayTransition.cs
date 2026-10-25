@@ -27,12 +27,18 @@ public class DayTransition : MonoBehaviour
         "Your game saves every time you sleep.",
     };
 
+    [Header("Wake-up sound")]
+    [SerializeField] private AudioSource audioSource;
+    [Tooltip("One is picked at random each morning (e.g. rooster, dove + bird chirps).")]
+    [SerializeField] private List<AudioClip> wakeUpClips = new();
+
     [Header("Saving")]
     [SerializeField] private TMP_Text savingLabel;
     [SerializeField] private string savingText = "Saving";
     [SerializeField] private float dotInterval = 0.35f;
 
     private int lastTip = -1;
+    private int lastWakeUpClip = -1;
     private int shownDots = -1;
 
     private void Awake()
@@ -66,9 +72,24 @@ public class DayTransition : MonoBehaviour
         return Fade(0f, 1f);
     }
 
-    public IEnumerator FadeIn() => Fade(1f, 0f);
+    public IEnumerator FadeIn()
+    {
+        PlayWakeUpSound();
+        return Fade(1f, 0f);
+    }
 
-    public WaitForSeconds Hold() => new WaitForSeconds(holdDuration);
+    private void PlayWakeUpSound()
+    {
+        if (audioSource == null || wakeUpClips.Count == 0) return;
+
+        int index = Random.Range(0, wakeUpClips.Count);
+        if (wakeUpClips.Count > 1 && index == lastWakeUpClip) index = (index + 1) % wakeUpClips.Count;
+        lastWakeUpClip = index;
+
+        if (wakeUpClips[index] != null) audioSource.PlayOneShot(wakeUpClips[index]);
+    }
+
+    public WaitForSecondsRealtime Hold() => new WaitForSecondsRealtime(holdDuration);
 
     public void SetDay(int day)
     {
@@ -94,7 +115,7 @@ public class DayTransition : MonoBehaviour
         float t = 0f;
         while (t < fadeDuration)
         {
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;   // runs while the game is paused for sleep
             group.alpha = Mathf.Lerp(from, to, t / fadeDuration);
             yield return null;
         }

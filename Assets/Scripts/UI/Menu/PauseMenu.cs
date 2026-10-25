@@ -11,6 +11,11 @@ public class PauseMenu : MonoBehaviour
 
     private bool isPaused;
 
+    private void Awake()
+    {
+        if (playerLook == null) playerLook = FindAnyObjectByType<PlayerLook>();
+    }
+
     private void Start()
     {
         if (pauseRoot != null) pauseRoot.SetActive(false);

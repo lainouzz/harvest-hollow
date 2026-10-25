@@ -10,7 +10,7 @@ public class MerchantBehavior : MonoBehaviour
     [SerializeField] private float timerBeforeArriving = 20f;
 
     [SerializeField] private Transform startPos;
-    [SerializeField] private Transform endPos;
+    [SerializeField] public Transform endPos;
     [SerializeField] private GameObject carPrefab;
 
     [SerializeField] private float wheelSpinMultiplier;
@@ -101,14 +101,14 @@ public class MerchantBehavior : MonoBehaviour
         SetState(State.Leaving);
     }
 
-    private void EnterAway()
+    public void EnterAway()
     {
         SetState(State.Away);
         timer = timerBeforeArriving;
         if (carPrefab != null) carPrefab.SetActive(false);
     }
 
-    private void EnterArriving()
+    public void EnterArriving()
     {
         SetState(State.Arriving);
         if (carPrefab != null) carPrefab.SetActive(true);
