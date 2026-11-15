@@ -26,6 +26,7 @@ public class PlantingController : MonoBehaviour
     private InventoryItem selectedSeedItem;
     private InventoryManager inventory;
     private PlayerLook playerLook;
+    private WaterCan can;
 
     [Header("Preview (optional)")]
     [Tooltip("A flat quad/decal that highlights the aimed cell. Leave empty to skip.")]
@@ -48,6 +49,7 @@ public class PlantingController : MonoBehaviour
         if (vfx == null) vfx = FindAnyObjectByType<ToolVFXPlayer>();
 
         inventory = FindFirstObjectByType<InventoryManager>(FindObjectsInactive.Include);
+        can = FindFirstObjectByType<WaterCan>(FindObjectsInactive.Include);
     }
 
     private void OnEnable()
@@ -94,8 +96,6 @@ public class PlantingController : MonoBehaviour
 
     private void Update()
     {
-        // Don't act on the world while a menu is open (inventory/shop) or the game is
-        // paused — otherwise the click that selects an inventory item also plants.
         if (IsBlocked())
         {
             if (cellHighlight != null) cellHighlight.SetActive(false);
@@ -133,11 +133,18 @@ public class PlantingController : MonoBehaviour
                 break;
 
             case ItemsInHand.WaterCan:
+                if (can != null && can.IsEmpty)
+                {
+                    can.PlayEmptySound();
+                    break;
+                }
+
                 if (grid.TryWater(aimedCell))
                 {
+                    if (can != null) can.Use();
                     PlayVFX(ToolVFXPlayer.ToolVFX.Water, pos);
                     if (wateringCanVFX != null && VfxSettings.Enabled) wateringCanVFX.Play();
-                }            
+                }
                 break;
 
             case ItemsInHand.Seeds:
@@ -241,7 +248,7 @@ public class PlantingController : MonoBehaviour
                 return grid.GetState(aimedCell) == TileState.Untilled;
 
             case ItemsInHand.WaterCan:
-                return grid.GetState(aimedCell) == TileState.Tilled;
+                return grid.GetState(aimedCell) == TileState.Tilled && (can == null || !can.IsEmpty);
 
             case ItemsInHand.Seeds:
                 return HasSeedInStock() && grid.CanPlantSeed(aimedCell);

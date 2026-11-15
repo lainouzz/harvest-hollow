@@ -27,7 +27,7 @@ public class FarmGrid : MonoBehaviour
 
     [Header("Watering")]
     [Tooltip("Nights watered soil stays wet before drying back to tilled. 1 = dry by the next morning.")]
-    [SerializeField, Min(1)] private int daysSoilStaysWet = 2;
+    [SerializeField, Min(1)] private int daysSoilStaysWet = 1;
 
     private GridCellData[,] cells;
 
@@ -63,8 +63,8 @@ public class FarmGrid : MonoBehaviour
         InitGrid();
     }
 
-    private void OnEnable() => DayManager.OnDayChanged += DrySoil;
-    private void OnDisable() => DayManager.OnDayChanged -= DrySoil;
+    private void OnEnable() => DayManager.OnDayChanged += RunNight;
+    private void OnDisable() => DayManager.OnDayChanged -= RunNight;
 
     private void InitGrid()
     {
@@ -120,15 +120,11 @@ public class FarmGrid : MonoBehaviour
         if (crop == null || crop.prefab == null) return false;
         if (!CanPlantSeed(cell)) return false;
 
-        bool watered = cells[cell.x, cell.y].state == TileState.Watered;
-        float growthMultiplier = watered ? crop.wateredGrowthMultiplier : 1f;
-        int bonusYield = watered ? crop.wateredYieldBonus : 0;
-
-        SpawnCrop(cell, crop, growthMultiplier, bonusYield);
+        SpawnCrop(cell, crop);
         return true;
     }
 
-    private Crop SpawnCrop(Vector2Int cell, CropData crop, float growthMultiplier, int bonusYield)
+    private Crop SpawnCrop(Vector2Int cell, CropData crop)
     {
         Vector3 worldPos = GridToWorld(cell, crop.size) + Vector3.up * 0.1f;
         GameObject instance = Instantiate(crop.prefab, worldPos, Quaternion.Euler(-90, 0, 0), transform);
@@ -136,10 +132,11 @@ public class FarmGrid : MonoBehaviour
         if (!instance.TryGetComponent(out Crop cropComponent))
             cropComponent = instance.AddComponent<Crop>();
 
-        cropComponent.Initialize(crop, cell, growthMultiplier, bonusYield);
+        cropComponent.Initialize(crop, cell);
 
         cells[cell.x, cell.y].crop = cropComponent;
         plantedCrops.Add(cropComponent);
+        RefreshMarker(cell, crop);
         cropComponent.OnGrown.AddListener(() => RefreshStatus(cell));
         RefreshStatus(cell);
         return cropComponent;
@@ -193,6 +190,7 @@ public class FarmGrid : MonoBehaviour
         crop.PlayHarvested();
         data.crop = null;
         RefreshStatus(cell);
+        RefreshMarker(cell, null);
 
         OnHarvested?.Invoke(cell, produce, amount);
 
@@ -245,9 +243,18 @@ public class FarmGrid : MonoBehaviour
         return true;
     }
 
-    // Crops already planted keep the bonus they got at planting; drying only
-    // affects whether the next seed planted here gets it.
-    private void DrySoil(int day)
+    // The night runs in a fixed order: every crop grows (reading whether its soil is
+    // wet tonight), THEN the soil dries. If crops listened for the new day themselves,
+    // the order would be random and a crop could miss its last wet night.
+    private void RunNight(int day)
+    {
+        foreach (Crop crop in new List<Crop>(plantedCrops))
+            if (crop != null) crop.GrowOneNight(IsWatered(crop.GridPosition));
+
+        DrySoil();
+    }
+
+    private void DrySoil()
     {
         for (int x = 0; x < gridWidth; ++x)
         {
@@ -525,8 +532,9 @@ public class FarmGrid : MonoBehaviour
                         z = z,
                         crop = c.crop.Data.name,
                         grownDays = c.crop.GrownDays,
-                        growthPerDay = c.crop.GrowthPerDay,
-                        bonusYield = c.crop.BonusYield
+                        nights = c.crop.NightsGrowing,
+                        wetNights = c.crop.WetNights,
+                        bonusYield = c.crop.LockedBonusYield
                     });
                 }
             }
@@ -579,8 +587,8 @@ public class FarmGrid : MonoBehaviour
             CropData data = db.FindCrop(c.crop);
             if (data == null || data.prefab == null || !CanPlantSeed(cell)) continue;
 
-            Crop crop = SpawnCrop(cell, data, c.growthPerDay, c.bonusYield);
-            crop.RestoreGrowth(c.grownDays);
+            Crop crop = SpawnCrop(cell, data);
+            crop.RestoreGrowth(c.grownDays, c.nights, c.wetNights, c.bonusYield);
             RefreshStatus(cell);
         }
 
@@ -611,21 +619,39 @@ public class FarmGrid : MonoBehaviour
     {
         GridCellData data = cells[cell.x, cell.y];
         if (!data.isOccupied) return CellStatus.Empty;
-        if (data.crop != null) return data.crop.IsGrown ? CellStatus.ReadyToHarvest : CellStatus.None;
+        if (data.crop != null && data.crop.IsGrown) return CellStatus.ReadyToHarvest;
+
+        // Dry soil needs water whether it's empty or a crop is growing in it.
         if (data.state == TileState.Tilled) return CellStatus.NeedsWater;
         return CellStatus.None;
     }
 
     private void RefreshStatus(Vector2Int cell)
     {
-        if (!IsInsideGrid(cell)) return;
+        TileStatusIcon icon = GetTileComponent<TileStatusIcon>(cell);
+        if (icon != null) icon.Show(GetStatus(cell));
+    }
+
+    // Shows the crop's sign on the tile, or hides it when crop is null.
+    private void RefreshMarker(Vector2Int cell, CropData crop)
+    {
+        CropMarker marker = GetTileComponent<CropMarker>(cell);
+        if (marker == null) return;
+
+        if (crop == null) marker.Hide();
+        else marker.Show(crop.produce != null && crop.produce.icon != null ? crop.produce.icon : crop.icon);
+    }
+
+    // Finds a component on the ground tile placed at this cell (null if there's no tile).
+    private T GetTileComponent<T>(Vector2Int cell) where T : Component
+    {
+        if (!IsInsideGrid(cell)) return null;
 
         string id = cells[cell.x, cell.y].id;
-        if (string.IsNullOrEmpty(id)) return;
-        if (!placed.TryGetValue(id, out PlacedObjectData po) || po.instance == null) return;
+        if (string.IsNullOrEmpty(id)) return null;
+        if (!placed.TryGetValue(id, out PlacedObjectData po) || po.instance == null) return null;
 
-        TileStatusIcon icon = po.instance.GetComponentInChildren<TileStatusIcon>(true);
-        if (icon != null) icon.Show(GetStatus(cell));
+        return po.instance.GetComponentInChildren<T>(true);
     }
 }
 

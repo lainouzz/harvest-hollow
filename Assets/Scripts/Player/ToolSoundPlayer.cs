@@ -18,6 +18,7 @@ public class ToolSoundPlayer : MonoBehaviour
     [SerializeField] private List<ToolSound> toolSounds = new();
 
     private GameInput input;
+    private WaterCan can;
     private int lastClipIndex = -1;
 
     private void Awake()
@@ -26,6 +27,7 @@ public class ToolSoundPlayer : MonoBehaviour
         if (itemSwitcher == null) itemSwitcher = FindAnyObjectByType<ItemSwitcher>();
         if (player == null) player = FindAnyObjectByType<PlayerLook>();
         if (source == null) source = GetComponent<AudioSource>();
+        can = FindFirstObjectByType<WaterCan>(FindObjectsInactive.Include);
     }
 
     private void OnEnable() => input.Enable();
@@ -44,6 +46,9 @@ public class ToolSoundPlayer : MonoBehaviour
     public void PlayCurrentToolSound()
     {
         if (itemSwitcher == null || source == null) return;
+
+        // An empty can plays its own "empty" sound instead of a splash.
+        if (itemSwitcher.Current == ItemsInHand.WaterCan && can != null && can.IsEmpty) return;
 
         List<AudioClip> clips = ClipsFor(itemSwitcher.Current);
         if (clips == null || clips.Count == 0) return;

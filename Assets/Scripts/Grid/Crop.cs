@@ -13,8 +13,9 @@ public class Crop : MonoBehaviour
 
     private CropData data;
     private float grownDays;
-    private float growthPerDay = 1f;
-    private int bonusYield;
+    private int nightsGrowing;
+    private int wetNights;
+    private int lockedBonusYield;   // bonus earned at planting under the 1.1 rules (old saves)
     private int shownStage = -1;
 
     public bool IsGrown { get; private set; }
@@ -25,48 +26,79 @@ public class Crop : MonoBehaviour
 
     public float Progress { get; private set; }
 
-    public int Yield => (data != null ? data.baseYield : 0) + bonusYield;
+    // Watered on at least half of the nights it spent growing.
+    public bool EarnedWaterBonus => nightsGrowing > 0 && wetNights * 2 >= nightsGrowing;
 
-    // True if one more night of growth will finish this crop.
-    public bool WillRipenTonight =>
-        !IsGrown && data != null && grownDays + growthPerDay >= (data.daysToGrow > 0 ? data.daysToGrow : 1);
+    public int Yield => data == null ? 0
+        : data.baseYield + Mathf.Max(lockedBonusYield, EarnedWaterBonus ? data.wateredYieldBonus : 0);
 
     public float GrownDays => grownDays;
-    public float GrowthPerDay => growthPerDay;
-    public int BonusYield => bonusYield;
+    public int NightsGrowing => nightsGrowing;
+    public int WetNights => wetNights;
+    public int LockedBonusYield => lockedBonusYield;
 
-    public void Initialize(CropData cropData, Vector2Int cell, float growthMultiplier = 1f, int bonusYield = 0)
+    private float TargetDays => data != null && data.daysToGrow > 0 ? data.daysToGrow : 1;
+
+    // True if one more night (wet or dry) will finish this crop.
+    public bool WillRipenTonight(bool wet) =>
+        !IsGrown && data != null && grownDays + GrowthFor(wet) >= TargetDays;
+
+    public void Initialize(CropData cropData, Vector2Int cell)
     {
         data = cropData;
         GridPosition = cell;
-        growthPerDay = Mathf.Max(0.01f, growthMultiplier);
-        this.bonusYield = bonusYield;
 
         grownDays = 0f;
+        nightsGrowing = 0;
+        wetNights = 0;
+        lockedBonusYield = 0;
         Progress = 0f;
         IsGrown = false;
         shownStage = -1;
         ApplyGrowth(0f);
     }
 
-    // Jumps straight to a saved amount of growth (call after Initialize). Doesn't fire
-    // OnGrown — the grid refreshes the tile icon itself after loading.
-    public void RestoreGrowth(float savedGrownDays)
+    // Jumps straight to saved growth (call after Initialize). Doesn't fire OnGrown,
+    // the grid refreshes the tile icon itself after loading.
+    public void RestoreGrowth(float savedGrownDays, int savedNights, int savedWetNights, int savedLockedBonus)
     {
         if (data == null) return;
 
         grownDays = Mathf.Max(0f, savedGrownDays);
-        float target = data.daysToGrow > 0 ? data.daysToGrow : 1;
-        Progress = Mathf.Clamp01(grownDays / target);
+        nightsGrowing = Mathf.Max(0, savedNights);
+        wetNights = Mathf.Clamp(savedWetNights, 0, nightsGrowing);
+        lockedBonusYield = Mathf.Max(0, savedLockedBonus);
+
+        Progress = Mathf.Clamp01(grownDays / TargetDays);
         IsGrown = Progress >= 1f;
         ApplyGrowth(Progress);
     }
 
-    // Quick bounce up, then shrink to nothing, then destroy. Disabling the component
-    // stops it from growing further (coroutines keep running on a disabled script).
+    // Called by FarmGrid once per night, before the soil dries. Wet soil grows faster;
+    // dry soil still grows, just slower.
+    public void GrowOneNight(bool wet)
+    {
+        if (data == null || IsGrown) return;
+
+        nightsGrowing++;
+        if (wet) wetNights++;
+        grownDays += GrowthFor(wet);
+
+        Progress = Mathf.Clamp01(grownDays / TargetDays);
+        ApplyGrowth(Progress);
+
+        if (Progress >= 1f)
+        {
+            IsGrown = true;
+            OnGrown?.Invoke();
+        }
+    }
+
+    private float GrowthFor(bool wet) => wet ? Mathf.Max(1f, data.wateredGrowthMultiplier) : 1f;
+
+    // Quick bounce up, then shrink to nothing, then destroy.
     public void PlayHarvested(float duration = 0.2f)
     {
-        enabled = false;
         StartCoroutine(ShrinkAndDestroy(duration));
     }
 
@@ -88,26 +120,6 @@ public class Crop : MonoBehaviour
         }
 
         Destroy(gameObject);
-    }
-
-    private void OnEnable() => DayManager.OnDayChanged += OnDayChanged;
-    private void OnDisable() => DayManager.OnDayChanged -= OnDayChanged;
-
-    private void OnDayChanged(int day)
-    {
-        if (data == null || IsGrown) return;
-
-        grownDays += growthPerDay;
-
-        float target = data.daysToGrow > 0 ? data.daysToGrow : 1;
-        Progress = Mathf.Clamp01(grownDays / target);
-        ApplyGrowth(Progress);
-
-        if (Progress >= 1f)
-        {
-            IsGrown = true;
-            OnGrown?.Invoke();
-        }
     }
 
     private void ApplyGrowth(float t)

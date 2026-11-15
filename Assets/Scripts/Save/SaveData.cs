@@ -8,6 +8,9 @@ public class SaveData
     public int coins;
     public int slotsBought;
 
+    // Water *used*, not water left, so saves from before 1.2 (missing field = 0) load full.
+    public int waterUsed;
+
     public List<ItemSave> items = new();
     public List<CellSave> unlockedCells = new();
     public List<TileSave> tiles = new();
@@ -57,6 +60,7 @@ public class CropSave
     public int x, z;
     public string crop;
     public float grownDays;
-    public float growthPerDay;
-    public int bonusYield;
+    public int nights;
+    public int wetNights;
+    public int bonusYield;   // bonus locked in at planting (1.1 rules); 0 for crops planted in 1.2+
 }

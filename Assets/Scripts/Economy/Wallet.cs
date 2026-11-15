@@ -3,10 +3,23 @@ using UnityEngine;
 
 public class Wallet : MonoBehaviour
 {
+    public static Wallet Instance { get; private set; }
+
     [SerializeField] private int coins = 100;
 
     public int Coins => coins;
     public event Action<int> OnCoinsChanged;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+    }
 
     private void Start()
     {

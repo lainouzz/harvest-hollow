@@ -58,9 +58,9 @@ public class PlayerMovement : MonoBehaviour
         UpdateGrounded();
         HandleJumpTimers();
 
-        if (jumpBufferCounter > 0f && coyoteCounter > 0f)
+        /*if (jumpBufferCounter > 0f && coyoteCounter > 0f)
             Jump();
-
+        */
         ApplyGravity();
         Move();
         HandleFootsteps();

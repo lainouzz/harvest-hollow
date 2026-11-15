@@ -25,7 +25,8 @@ public class DayStats : MonoBehaviour
 
             int count = 0;
             foreach (Crop crop in grid.PlantedCrops)
-                if (crop != null && (crop.IsGrown || crop.WillRipenTonight)) count++;
+                if (crop != null && (crop.IsGrown || crop.WillRipenTonight(grid.IsWatered(crop.GridPosition))))
+                    count++;
             return count;
         }
     }

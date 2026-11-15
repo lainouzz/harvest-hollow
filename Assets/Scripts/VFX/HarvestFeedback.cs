@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Plays the "you got something" feedback when a crop is harvested: a floating
-// pickup popup and a pluck/pop sound. Driven by FarmGrid.OnHarvested, so it only
-// fires on a real harvest, never on a missed swing.
 public class HarvestFeedback : MonoBehaviour
 {
     [SerializeField] private FarmGrid grid;
@@ -22,6 +19,7 @@ public class HarvestFeedback : MonoBehaviour
     private void Awake()
     {
         if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
+        
     }
 
     private void OnEnable()
@@ -36,6 +34,7 @@ public class HarvestFeedback : MonoBehaviour
 
     private void OnHarvested(Vector2Int cell, InventoryItem item, int amount)
     {
+
         Vector3 pos = grid.GridToWorld(cell) + Vector3.up * popupHeight;
 
         if (popupPrefab != null && item != null)

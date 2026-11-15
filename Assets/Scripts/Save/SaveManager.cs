@@ -12,6 +12,7 @@ public class SaveManager : MonoBehaviour
     [SerializeField] private FarmGrid grid;
     [SerializeField] private FarmExpansion expansion;
     [SerializeField] private Wallet wallet;
+    [SerializeField] private WaterCan waterCan;
 
     private void Awake()
     {
@@ -25,6 +26,7 @@ public class SaveManager : MonoBehaviour
         if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
         if (expansion == null) expansion = FindAnyObjectByType<FarmExpansion>();
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
+        if (waterCan == null) waterCan = FindFirstObjectByType<WaterCan>(FindObjectsInactive.Include);
     }
 
     private void OnDestroy()
@@ -54,6 +56,7 @@ public class SaveManager : MonoBehaviour
         if (DayManager.Instance != null) save.day = DayManager.Instance.CurrentDay;
         if (wallet != null) save.coins = wallet.Coins;
         if (expansion != null) save.slotsBought = expansion.SlotsBought;
+        if (waterCan != null) save.waterUsed = waterCan.Used;
 
         if (InventoryManager.Instance != null)
         {
@@ -73,6 +76,7 @@ public class SaveManager : MonoBehaviour
 
         if (wallet != null) wallet.SetCoins(save.coins);
         if (expansion != null) expansion.SlotsBought = save.slotsBought;
+        if (waterCan != null) waterCan.Used = save.waterUsed;
 
         if (InventoryManager.Instance != null)
         {
