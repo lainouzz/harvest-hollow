@@ -29,6 +29,16 @@ public class FarmGrid : MonoBehaviour
     [Tooltip("Nights watered soil stays wet before drying back to tilled. 1 = dry by the next morning.")]
     [SerializeField, Min(1)] private int daysSoilStaysWet = 1;
 
+    [Header("Greenhouse")]
+    [Tooltip("Greenhouse bed: accepts greenhouse-only crops and waters itself every morning.")]
+    [SerializeField] private bool isGreenhouse;
+    [Tooltip("Unique name for the save file. Leave empty ONLY on the main farm grid.")]
+    [SerializeField] private string saveId;
+
+    [Header("Crop signs")]
+    [Tooltip("Turns the crop signs on this grid around each tile's centre (degrees), e.g. 180 so they face the aisle.")]
+    [SerializeField] private float signRotation;
+
     private GridCellData[,] cells;
 
     // Each open fence side is stored once, as the right or top edge of a cell, so
@@ -40,8 +50,6 @@ public class FarmGrid : MonoBehaviour
     private readonly List<Crop> plantedCrops = new();
     public IReadOnlyList<Crop> PlantedCrops => plantedCrops;
 
-    private Wallet wallet;
-
     public Vector3 Origin => transform.position;
     public int Width => gridWidth;
     public int Height => gridHeight;
@@ -49,6 +57,8 @@ public class FarmGrid : MonoBehaviour
     
     public float StepX => cellSize + cellSpacing.x;
     public float StepZ => cellSize + cellSpacing.z;
+    public bool IsGreenhouse => isGreenhouse;
+    public string SaveId => saveId;
 
     public event Action<Vector2Int, TileState> OnCellStateChanged;
 
@@ -56,7 +66,20 @@ public class FarmGrid : MonoBehaviour
 
     public event Action OnFenceChanged;
 
-    public event Action<Vector2Int, InventoryItem, int> OnHarvested;
+    // Static so listeners hear harvests from every grid (farm + greenhouse beds)
+    // without having to find and subscribe to each one.
+    public static event Action<FarmGrid, Vector2Int, InventoryItem, int> AnyHarvested;
+
+    // The main farm, not a greenhouse bed. Use this instead of FindAnyObjectByType<FarmGrid>,
+    // which could return any of the grids.
+    public static FarmGrid FindMain()
+    {
+        foreach (FarmGrid g in FindObjectsByType<FarmGrid>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            if (!g.isGreenhouse) return g;
+        return null;
+    }
+
+    public bool Accepts(CropData crop) => crop != null && (isGreenhouse || !crop.greenhouseOnly);
 
     private void Awake()
     {
@@ -98,7 +121,13 @@ public class FarmGrid : MonoBehaviour
         
         if (instance.TryGetComponent(out GroundTile groundTile))
             groundTile.SetState(TileState.Untilled);
-           
+
+        if (signRotation != 0f)
+        {
+            CropMarker marker = instance.GetComponentInChildren<CropMarker>(true);
+            if (marker != null) marker.SetYaw(signRotation);
+        }
+
         string id = Guid.NewGuid().ToString();
         OccupyCells(cell, crop.size, id);
 
@@ -117,7 +146,7 @@ public class FarmGrid : MonoBehaviour
 
     public bool TryPlantSeed(Vector2Int cell, CropData crop)
     {
-        if (crop == null || crop.prefab == null) return false;
+        if (crop == null || crop.prefab == null || !Accepts(crop)) return false;
         if (!CanPlantSeed(cell)) return false;
 
         SpawnCrop(cell, crop);
@@ -192,11 +221,7 @@ public class FarmGrid : MonoBehaviour
         RefreshStatus(cell);
         RefreshMarker(cell, null);
 
-        OnHarvested?.Invoke(cell, produce, amount);
-
-        if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
-        //if (wallet != null) wallet.Add(10);
-
+        AnyHarvested?.Invoke(this, cell, produce, amount);
         return true;
     }
 
@@ -227,6 +252,7 @@ public class FarmGrid : MonoBehaviour
         if (data.state != TileState.Untilled) return false;
 
         SetCellState(cell, data, TileState.Tilled);
+        if (isGreenhouse) TryWater(cell);
         return true;
     }
 
@@ -252,6 +278,15 @@ public class FarmGrid : MonoBehaviour
             if (crop != null) crop.GrowOneNight(IsWatered(crop.GridPosition));
 
         DrySoil();
+        if (isGreenhouse) WaterAllTilled();   // the misting pipe waters the beds every morning
+    }
+
+    private void WaterAllTilled()
+    {
+        for (int x = 0; x < gridWidth; ++x)
+            for (int z = 0; z < gridHeight; ++z)
+                if (cells[x, z].isOccupied && cells[x, z].state == TileState.Tilled)
+                    TryWater(new Vector2Int(x, z));
     }
 
     private void DrySoil()
@@ -501,7 +536,7 @@ public class FarmGrid : MonoBehaviour
         }
     }
     
-    public void CaptureState(SaveData save)
+    public void CaptureState(GridSave save)
     {
         save.unlockedCells.Clear();
         save.tiles.Clear();
@@ -550,7 +585,7 @@ public class FarmGrid : MonoBehaviour
     // Rebuilds the farm from a save: unlocked plots first, then tiles, then their
     // tilled/watered state, then the crops growing on them (order matters — each
     // step needs the previous one in place).
-    public void RestoreState(SaveData save, SaveDatabase db)
+    public void RestoreState(GridSave save, SaveDatabase db)
     {
         ClearAll();
 

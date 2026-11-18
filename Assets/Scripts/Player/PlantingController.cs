@@ -4,8 +4,10 @@ using UnityEngine.InputSystem;
 public class PlantingController : MonoBehaviour
 {
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private FarmGrid grid;
     [SerializeField] private Animator anim;
+
+    private FarmGrid[] grids;
+    private FarmGrid grid;   // the grid you're aiming at right now
 
     [Tooltip("Decides what a left-click does. Leave empty to find it in the scene.")]
     [SerializeField] private ItemSwitcher itemSwitcher;
@@ -50,6 +52,11 @@ public class PlantingController : MonoBehaviour
 
         inventory = FindFirstObjectByType<InventoryManager>(FindObjectsInactive.Include);
         can = FindFirstObjectByType<WaterCan>(FindObjectsInactive.Include);
+
+        // Greenhouse beds first: they're small and precise, so they win if the main
+        // farm's (mostly locked) area happens to overlap them.
+        grids = FindObjectsByType<FarmGrid>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        System.Array.Sort(grids, (a, b) => b.IsGreenhouse.CompareTo(a.IsGreenhouse));
     }
 
     private void OnEnable()
@@ -173,17 +180,25 @@ public class PlantingController : MonoBehaviour
     private void UpdateAimedCell()
     {
         hasAimedCell = false;
-        if (grid == null || playerCamera == null) return;
+        if (playerCamera == null) return;
 
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (!Physics.Raycast(ray, out RaycastHit hit, maxReach, groundMask))
             return;
 
-        Vector2Int cell = grid.WorldToGrid(hit.point);
-        if (!grid.IsInsideGrid(cell)) return;
+        // A disabled grid is a greenhouse bed that isn't restored yet.
+        foreach (FarmGrid g in grids)
+        {
+            if (g == null || !g.isActiveAndEnabled) continue;
 
-        aimedCell = cell;
-        hasAimedCell = true;
+            Vector2Int cell = g.WorldToGrid(hit.point);
+            if (!g.IsInsideGrid(cell)) continue;
+
+            grid = g;
+            aimedCell = cell;
+            hasAimedCell = true;
+            return;
+        }
     }
 
     private bool TryPlantAimed()
@@ -251,7 +266,7 @@ public class PlantingController : MonoBehaviour
                 return grid.GetState(aimedCell) == TileState.Tilled && (can == null || !can.IsEmpty);
 
             case ItemsInHand.Seeds:
-                return HasSeedInStock() && grid.CanPlantSeed(aimedCell);
+                return HasSeedInStock() && grid.Accepts(selectedSeed) && grid.CanPlantSeed(aimedCell);
 
             case ItemsInHand.HarvestTool:
                 return grid.CanHarvest(aimedCell);

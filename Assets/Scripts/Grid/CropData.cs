@@ -14,6 +14,9 @@ public class CropData : ScriptableObject
     [Tooltip("Footprint on the grid, in cells.")]
     public Vector2Int size = Vector2Int.one;
 
+    [Tooltip("Can only be planted in greenhouse beds (and only sold once the greenhouse is restored).")]
+    public bool greenhouseOnly;
+
     [Header("Growth")]
     [Tooltip("How many days from planting to fully grown (on unwatered soil).")]
     public int daysToGrow = 3;

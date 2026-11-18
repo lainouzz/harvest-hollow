@@ -51,6 +51,7 @@ public class MerchantBuySection : MerchantSection
         foreach (BuyableCrop entry in catalog)
         {
             if (entry.item == null) continue;
+            if (entry.item.crop != null && entry.item.crop.greenhouseOnly && !Greenhouse.AnyOwned) continue;
             if (UnityEngine.Random.value <= ChanceFor(entry.tier))
                 currentStock.Add(entry.item);
         }

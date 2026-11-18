@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using System.ComponentModel.Design;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem.LowLevel;
 
 public class Greenhouse : MonoBehaviour
 {
@@ -26,8 +24,17 @@ public class Greenhouse : MonoBehaviour
     [SerializeField] private AudioSource source;
     [SerializeField] private AudioClip audioClip;
 
+    [Tooltip("The raised beds inside. They can't be used until the greenhouse is restored.")]
+    [SerializeField] private FarmGrid[] beds;
+
     public bool IsOwned => owned;
+    public int Price => price;
     public bool DoorsOpen { get; private set; }
+
+    // The merchant only stocks greenhouse seeds once this is true.
+    public static bool AnyOwned { get; private set; }
+
+    private bool playerNear;
 
     Quaternion closedL, closedR, openL, openR;
     Coroutine doorRoutine;
@@ -69,8 +76,8 @@ public class Greenhouse : MonoBehaviour
         return true;
     }
 
-    /// For save/load: sets state instantly
-    private void SetOwned(bool value)
+    // For save/load: sets the state instantly, no effects.
+    public void SetOwned(bool value)
     {
         owned = value;
         if (!owned) SetDoors(false, instant: true);
@@ -103,9 +110,14 @@ public class Greenhouse : MonoBehaviour
         }
         ApplyState();
         onPurchased?.Invoke();
+        if (playerNear) OpenDoors();
     }
+
     private void ApplyState()
     {
+        AnyOwned = owned;
+        foreach (FarmGrid bed in beds) if (bed) bed.enabled = owned;
+
         bool showBroken = mode == PurchaseMode.BrokenRestore && !owned;
 
         foreach (var g in brokenParts) if (g) g.SetActive(showBroken);
@@ -164,12 +176,16 @@ public class Greenhouse : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (owned && other.CompareTag(autoOpenTag)) OpenDoors();
+        if (!other.CompareTag(autoOpenTag)) return;
+        playerNear = true;
+        if (owned) OpenDoors();
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (owned && other.CompareTag(autoOpenTag)) CloseDoors();
+        if (!other.CompareTag(autoOpenTag)) return;
+        playerNear = false;
+        if (owned) CloseDoors();
     }
 
 #if UNITY_EDITOR

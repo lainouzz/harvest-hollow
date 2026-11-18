@@ -20,7 +20,7 @@ public class FenceOpener : MonoBehaviour
 
     private void Awake()
     {
-        if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
+        if (grid == null) grid = FarmGrid.FindMain();
         if (playerCamera == null) playerCamera = Camera.main;
         if (playerLook == null) playerLook = FindAnyObjectByType<PlayerLook>();
     }

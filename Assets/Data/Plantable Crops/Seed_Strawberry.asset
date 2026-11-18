@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc9e59e82f954ce46b9a52fba9a235f1, type: 3}
+  m_Name: Seed_Strawberry
+  m_EditorClassIdentifier: 
+  cropName: Strawberry
+  prefab: {fileID: 8525283698412173982, guid: 98ddf440d19b2204dac38112fcf57c7f, type: 3}
+  icon: {fileID: 21300000, guid: 9d5554e0c10649b892d7a112e5a9f15b, type: 3}
+  size: {x: 1, y: 1}
+  greenhouseOnly: 1
+  daysToGrow: 3
+  baseYield: 4
+  produce: {fileID: 11400000, guid: 167173fbafe2e6945bb560c2a9f864ef, type: 2}
+  wateredGrowthMultiplier: 1.5
+  wateredYieldBonus: 1

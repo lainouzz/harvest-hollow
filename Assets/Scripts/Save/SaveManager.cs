@@ -13,6 +13,9 @@ public class SaveManager : MonoBehaviour
     [SerializeField] private FarmExpansion expansion;
     [SerializeField] private Wallet wallet;
     [SerializeField] private WaterCan waterCan;
+    [SerializeField] private Greenhouse greenhouse;
+
+    private FarmGrid[] extraGrids;
 
     private void Awake()
     {
@@ -23,7 +26,19 @@ public class SaveManager : MonoBehaviour
         }
         Instance = this;
 
-        if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
+        if (grid == null) grid = FarmGrid.FindMain();
+        if (greenhouse == null) greenhouse = FindFirstObjectByType<Greenhouse>(FindObjectsInactive.Include);
+
+        List<FarmGrid> extras = new();
+        foreach (FarmGrid g in FindObjectsByType<FarmGrid>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (g == grid) continue;
+            if (string.IsNullOrEmpty(g.SaveId))
+                Debug.LogWarning($"SaveManager: '{g.name}' has no Save Id, so it won't be saved.", g);
+            else
+                extras.Add(g);
+        }
+        extraGrids = extras.ToArray();
         if (expansion == null) expansion = FindAnyObjectByType<FarmExpansion>();
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
         if (waterCan == null) waterCan = FindFirstObjectByType<WaterCan>(FindObjectsInactive.Include);
@@ -65,6 +80,14 @@ public class SaveManager : MonoBehaviour
         }
 
         if (grid != null) grid.CaptureState(save);
+        if (greenhouse != null) save.greenhouseOwned = greenhouse.IsOwned;
+
+        foreach (FarmGrid g in extraGrids)
+        {
+            NamedGridSave gs = new NamedGridSave { id = g.SaveId };
+            g.CaptureState(gs);
+            save.extraGrids.Add(gs);
+        }
 
         SaveSystem.Write(save);
         Debug.Log($"Game saved (day {save.day}).");
@@ -90,6 +113,17 @@ public class SaveManager : MonoBehaviour
         }
 
         if (grid != null) grid.RestoreState(save, database);
+        if (greenhouse != null) greenhouse.SetOwned(save.greenhouseOwned);
+
+        // Saves from before 1.3 have no extraGrids, so the beds simply stay empty.
+        if (save.extraGrids != null)
+        {
+            foreach (FarmGrid g in extraGrids)
+            {
+                NamedGridSave gs = save.extraGrids.Find(s => s.id == g.SaveId);
+                if (gs != null) g.RestoreState(gs, database);
+            }
+        }
 
         // Last, so anything that resets on "day loaded" (like DayStats) sees the restored coins.
         if (DayManager.Instance != null) DayManager.Instance.SetDay(save.day);

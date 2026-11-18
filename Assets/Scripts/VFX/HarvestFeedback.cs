@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class HarvestFeedback : MonoBehaviour
 {
-    [SerializeField] private FarmGrid grid;
-
     [Header("Popup")]
     [SerializeField] private PickupPopup popupPrefab;
     [SerializeField] private float popupHeight = 0.8f;
@@ -16,25 +14,11 @@ public class HarvestFeedback : MonoBehaviour
     [SerializeField] private List<AudioClip> popClips = new();
     [SerializeField] private Vector2 pitchRange = new Vector2(0.95f, 1.1f);
 
-    private void Awake()
-    {
-        if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
-        
-    }
+    private void OnEnable() => FarmGrid.AnyHarvested += OnHarvested;
+    private void OnDisable() => FarmGrid.AnyHarvested -= OnHarvested;
 
-    private void OnEnable()
+    private void OnHarvested(FarmGrid grid, Vector2Int cell, InventoryItem item, int amount)
     {
-        if (grid != null) grid.OnHarvested += OnHarvested;
-    }
-
-    private void OnDisable()
-    {
-        if (grid != null) grid.OnHarvested -= OnHarvested;
-    }
-
-    private void OnHarvested(Vector2Int cell, InventoryItem item, int amount)
-    {
-
         Vector3 pos = grid.GridToWorld(cell) + Vector3.up * popupHeight;
 
         if (popupPrefab != null && item != null)

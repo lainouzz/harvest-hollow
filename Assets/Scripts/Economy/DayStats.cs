@@ -5,9 +5,9 @@ using UnityEngine;
 // summary. Resets every new day, and when a save is loaded.
 public class DayStats : MonoBehaviour
 {
-    [SerializeField] private FarmGrid grid;
     [SerializeField] private Wallet wallet;
 
+    private FarmGrid[] grids;
     private readonly Dictionary<InventoryItem, int> harvested = new();
     private int prevCoins;
 
@@ -21,25 +21,24 @@ public class DayStats : MonoBehaviour
     {
         get
         {
-            if (grid == null) return 0;
-
             int count = 0;
-            foreach (Crop crop in grid.PlantedCrops)
-                if (crop != null && (crop.IsGrown || crop.WillRipenTonight(grid.IsWatered(crop.GridPosition))))
-                    count++;
+            foreach (FarmGrid grid in grids)
+                foreach (Crop crop in grid.PlantedCrops)
+                    if (crop != null && (crop.IsGrown || crop.WillRipenTonight(grid.IsWatered(crop.GridPosition))))
+                        count++;
             return count;
         }
     }
 
     private void Awake()
     {
-        if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
+        grids = FindObjectsByType<FarmGrid>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
     }
 
     private void OnEnable()
     {
-        if (grid != null) grid.OnHarvested += OnHarvested;
+        FarmGrid.AnyHarvested += OnHarvested;
         if (wallet != null) wallet.OnCoinsChanged += OnCoinsChanged;
         DayManager.OnDayChanged += OnNewDay;
         DayManager.OnDayLoaded += OnNewDay;
@@ -47,7 +46,7 @@ public class DayStats : MonoBehaviour
 
     private void OnDisable()
     {
-        if (grid != null) grid.OnHarvested -= OnHarvested;
+        FarmGrid.AnyHarvested -= OnHarvested;
         if (wallet != null) wallet.OnCoinsChanged -= OnCoinsChanged;
         DayManager.OnDayChanged -= OnNewDay;
         DayManager.OnDayLoaded -= OnNewDay;
@@ -55,7 +54,7 @@ public class DayStats : MonoBehaviour
 
     private void Start() => ResetDay();
 
-    private void OnHarvested(Vector2Int cell, InventoryItem item, int amount)
+    private void OnHarvested(FarmGrid grid, Vector2Int cell, InventoryItem item, int amount)
     {
         if (item == null) return;
 

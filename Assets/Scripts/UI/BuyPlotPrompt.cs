@@ -24,7 +24,7 @@ public class BuyPlotPrompt : MonoBehaviour
     private void Awake()
     {
         if (expansion == null) expansion = FindAnyObjectByType<FarmExpansion>();
-        if (grid == null) grid = FindAnyObjectByType<FarmGrid>();
+        if (grid == null) grid = FarmGrid.FindMain();
         if (wallet == null) wallet = FindAnyObjectByType<Wallet>();
         SetShown(false);
     }
