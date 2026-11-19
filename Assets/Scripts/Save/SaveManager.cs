@@ -14,6 +14,7 @@ public class SaveManager : MonoBehaviour
     [SerializeField] private Wallet wallet;
     [SerializeField] private WaterCan waterCan;
     [SerializeField] private Greenhouse greenhouse;
+    [SerializeField] private ChickenCoop coop;
 
     private FarmGrid[] extraGrids;
 
@@ -28,6 +29,7 @@ public class SaveManager : MonoBehaviour
 
         if (grid == null) grid = FarmGrid.FindMain();
         if (greenhouse == null) greenhouse = FindFirstObjectByType<Greenhouse>(FindObjectsInactive.Include);
+        if (coop == null) coop = FindFirstObjectByType<ChickenCoop>(FindObjectsInactive.Include);
 
         List<FarmGrid> extras = new();
         foreach (FarmGrid g in FindObjectsByType<FarmGrid>(FindObjectsInactive.Include, FindObjectsSortMode.None))
@@ -81,6 +83,11 @@ public class SaveManager : MonoBehaviour
 
         if (grid != null) grid.CaptureState(save);
         if (greenhouse != null) save.greenhouseOwned = greenhouse.IsOwned;
+        if (coop != null)
+        {
+            save.chickens = coop.ChickenCount;
+            save.eggsWaiting = coop.EggsWaiting;
+        }
 
         foreach (FarmGrid g in extraGrids)
         {
@@ -114,6 +121,7 @@ public class SaveManager : MonoBehaviour
 
         if (grid != null) grid.RestoreState(save, database);
         if (greenhouse != null) greenhouse.SetOwned(save.greenhouseOwned);
+        if (coop != null) coop.Restore(save.chickens, save.eggsWaiting);
 
         // Saves from before 1.3 have no extraGrids, so the beds simply stay empty.
         if (save.extraGrids != null)

@@ -54,7 +54,11 @@ public class DayStats : MonoBehaviour
 
     private void Start() => ResetDay();
 
-    private void OnHarvested(FarmGrid grid, Vector2Int cell, InventoryItem item, int amount)
+    private void OnHarvested(FarmGrid grid, Vector2Int cell, InventoryItem item, int amount) =>
+        RecordHarvest(item, amount);
+
+    // Also used for things that aren't crops, like eggs from the coop.
+    public void RecordHarvest(InventoryItem item, int amount)
     {
         if (item == null) return;
 

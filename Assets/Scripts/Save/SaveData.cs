@@ -33,6 +33,9 @@ public class SaveData : GridSave
     public List<ItemSave> items = new();
 
     public bool greenhouseOwned;
+
+    public int chickens;
+    public int eggsWaiting;
     public List<NamedGridSave> extraGrids = new();
 }
 
