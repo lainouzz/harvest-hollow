@@ -143,7 +143,7 @@ MonoBehaviour:
     name: Plant_1_1
   - gameObject: {fileID: 1955936618837180, guid: 465cbb465c9880c45887d824bd1f720b, type: 3}
     settings:
-      m_Strength: 10.095966
+      m_Strength: 51.900192
       m_RotationRangeMin: {x: 0, y: 0, z: 0}
       m_RotationRangeMax: {x: 8.13559, y: 161.92284, z: 0}
       m_ScaleRangeMin: {x: 0.4896422, y: 0.47269303, z: 0.41619587}
@@ -164,7 +164,7 @@ MonoBehaviour:
       m_RotationRangeMax: {x: 0, y: 0, z: 0}
       m_ScaleRangeMin: {x: 1, y: 1, z: 1}
       m_ScaleRangeMax: {x: 1, y: 1, z: 1}
-      m_UniformScale: {x: 0.32692307, y: 0.66346157}
+      m_UniformScale: {x: 0.32692307, y: 1.2674885}
       m_UniformBool: 1
       m_XRotationBool: 0
       m_YRotationBool: 0

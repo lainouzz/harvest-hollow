@@ -235,9 +235,25 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.1679
       objectReference: {fileID: 0}
+    - target: {fileID: -2367061708560461293, guid: 2560b479320fd9147bfdbbc430fcf8b8, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2560b479320fd9147bfdbbc430fcf8b8, type: 3}
       propertyPath: m_Name
       value: SeedBag_Stylized
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 2560b479320fd9147bfdbbc430fcf8b8, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1744941188184534680, guid: 2560b479320fd9147bfdbbc430fcf8b8, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6984956152710064852, guid: 2560b479320fd9147bfdbbc430fcf8b8, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

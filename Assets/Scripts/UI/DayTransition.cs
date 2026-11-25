@@ -16,7 +16,11 @@ public class DayTransition : MonoBehaviour
     [SerializeField, TextArea(1, 3)] private List<string> tips = new()
     {
         "Water tilled soil before you plant. Seeds in wet soil grow faster and give more.",
-        "Soil dries out after a couple of days, so check your fields each morning.",
+        "Soil dries out overnight, so water your fields every morning.",
+        "Out of water? Refill your watering can at the well.",
+        "The greenhouse beds water themselves every morning.",
+        "Strawberries and tulips only grow in the greenhouse.",
+        "Chickens lay an egg every morning. Don't let the nest box fill up!",
         "Your harvest is also your seeds. Keep a few to replant!",
         "The merchant's stock changes every day. Check back for rare seeds.",
         "Selling pays half an item's price. Planting it might earn you more.",

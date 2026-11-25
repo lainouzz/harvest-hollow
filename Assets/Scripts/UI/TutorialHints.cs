@@ -27,12 +27,15 @@ public class TutorialHints : MonoBehaviour
         new Hint { message = "Welcome to Harvest Hollow!\nWASD to move, mouse to look, Space to jump.\n(Enter: next tip)" },
         new Hint { message = "Press 1-5 to switch what you're holding, and left-click to use it." },
         new Hint { message = "With the hoe, click an empty plot to lay soil, then click it again to till it." },
-        new Hint { message = "Water tilled soil before planting. Seeds in wet soil grow faster and give more." },
+        new Hint { message = "Water your soil every day. It dries out overnight, and crops in wet soil grow faster and give more." },
+        new Hint { message = "Your watering can holds 10 waterings. Refill it at the well by pressing E." },
         new Hint { message = "Press Tab to open your inventory and click a seed to pick it, then plant it with the seed bag." },
         new Hint { message = "Harvest ripe crops with the harvest tool. Walk up to the merchant's truck to sell them and buy seeds." },
         new Hint { message = "Look at a plot with a price over it and press B to buy it." },
         new Hint { message = "Press X on a fence to open a path through it." },
-        new Hint { message = "Walk into the sleep spot to end the day. Crops grow overnight and your game is saved." },
+        new Hint { message = "Save up to restore the old greenhouse. Its beds water themselves, and some crops only grow in there." },
+        new Hint { message = "Buy chickens at the coop. Each one lays an egg every morning for you to collect and sell." },
+        new Hint { message = "The icon in front of the house is your bed. Press E there to end the day. Crops grow overnight and your game is saved." },
     };
 
     private void Start()

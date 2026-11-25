@@ -11,6 +11,7 @@ public class SeedBag : MonoBehaviour
     private InventoryItem seedItem;
     private int seedFullCount;
     private Vector3 targetLocalPos;
+    private bool wasVisible;
 
     private void Awake()
     {
@@ -30,6 +31,7 @@ public class SeedBag : MonoBehaviour
 
     private void OnDisable()
     {
+        wasVisible = false;
         if (inventory == null) return;
 
         inventory.OnItemSelected -= SetSeed;
@@ -37,10 +39,19 @@ public class SeedBag : MonoBehaviour
     }
 
     // LateUpdate so the slide wins over any bag animation on this object.
+    // When the bag is taken out, snap straight to the right fill level: switching tools
+    // resets the bag to its rest pose, and sliding from "full" every time would look odd.
     private void LateUpdate()
     {
-        seedPrefab.localPosition = Vector3.MoveTowards(
-            seedPrefab.localPosition, targetLocalPos, slideSpeed * Time.deltaTime);
+        bool visible = seedPrefab.gameObject.activeInHierarchy;
+
+        if (visible && !wasVisible)
+            seedPrefab.localPosition = targetLocalPos;
+        else
+            seedPrefab.localPosition = Vector3.MoveTowards(
+                seedPrefab.localPosition, targetLocalPos, slideSpeed * Time.deltaTime);
+
+        wasVisible = visible;
     }
 
     private void SetSeed(InventoryItem item)

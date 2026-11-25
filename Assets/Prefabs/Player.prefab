@@ -758,9 +758,11 @@ MonoBehaviour:
   - message: With the hoe, click an empty plot to lay soil, then click it again to
       till it.
     duration: 6
-  - message: Water tilled soil before planting. Seeds in wet soil grow faster and
-      give more. Important to keep track on your soil, they can dry out and will
-      need to be watered again.
+  - message: Water your soil every day. It dries out overnight, and crops in wet
+      soil grow faster and give more.
+    duration: 6
+  - message: Your watering can holds 10 waterings. Refill it at the well by pressing
+      E.
     duration: 6
   - message: Press Tab to open your inventory and click a seed to pick it, then plant
       it with the seed bag.
@@ -772,8 +774,14 @@ MonoBehaviour:
     duration: 6
   - message: Press X on a fence to open a path through it.
     duration: 6
-  - message: The icon at the fron of the house if your Save/Sleep spot. Crops grow
-      overnight and your game is saved.
+  - message: Save up to restore the old greenhouse. Its beds water themselves, and
+      some crops only grow in there.
+    duration: 6
+  - message: Buy chickens at the coop. Each one lays an egg every morning for you
+      to collect and sell.
+    duration: 6
+  - message: The icon in front of the house is your bed. Press E there to end the
+      day. Crops grow overnight and your game is saved.
     duration: 6
 --- !u!114 &8601425234666459033
 MonoBehaviour:

@@ -36,6 +36,8 @@ public class SaveData : GridSave
 
     public int chickens;
     public int eggsWaiting;
+
+    public int slotPullsToday;
     public List<NamedGridSave> extraGrids = new();
 }
 

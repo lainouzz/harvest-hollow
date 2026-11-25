@@ -149,7 +149,7 @@ MonoBehaviour:
   active: 1
   temperature:
     m_OverrideState: 1
-    m_Value: 20
+    m_Value: 10
   tint:
     m_OverrideState: 0
     m_Value: 0
@@ -170,11 +170,11 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: {x: 1, y: 0.9582174, z: 0.81538737, w: 0}
   midtones:
-    m_OverrideState: 0
-    m_Value: {x: 0.98687965, y: 0.9979309, z: 1, w: 0.02862596}
+    m_OverrideState: 1
+    m_Value: {x: 0.9543872, y: 0.91834545, z: 1, w: 0.02862596}
   highlights:
-    m_OverrideState: 0
-    m_Value: {x: 1, y: 0.9853735, z: 0.77146673, w: -0.1431298}
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 0.99568427, z: 0.92770934, w: -0.1431298}
   shadowsStart:
     m_OverrideState: 0
     m_Value: 0
@@ -202,16 +202,16 @@ MonoBehaviour:
   active: 1
   postExposure:
     m_OverrideState: 0
-    m_Value: 0
+    m_Value: -1.03
   contrast:
     m_OverrideState: 1
-    m_Value: 7
+    m_Value: 15
   colorFilter:
     m_OverrideState: 1
     m_Value: {r: 1.2090292, g: 1.2090292, b: 0.9752075, a: 1}
   hueShift:
     m_OverrideState: 0
-    m_Value: 0
+    m_Value: 48
   saturation:
     m_OverrideState: 1
-    m_Value: 10
+    m_Value: 1
